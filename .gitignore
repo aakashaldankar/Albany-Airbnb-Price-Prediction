@@ -2,6 +2,6 @@
 venv_labs
 machine_learning_cycle
 venv
-data/
+central_data/
 logs/
 __pycache__/
