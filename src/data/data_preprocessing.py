@@ -6,7 +6,8 @@ import ast
 from datetime import datetime
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-logger=get_logger(__file__)
+script_name=os.path.basename(__file__)
+logger=get_logger(script_name)
 
 train_data_filename='train_data.csv'
 test_data_filename='test_data.csv'
@@ -15,11 +16,11 @@ root_dir=os.path.dirname(os.path.abspath(os.path.join(os.path.dirname(__file__),
 extracted_data_path=os.path.join(root_dir,'central_data','raw_data')
 print(extracted_data_path)
 
+processed_path=os.path.join(root_dir,'central_data','pre_processed')
+os.makedirs(processed_path, exist_ok=True)
+
 train_data_file_path=os.path.join(extracted_data_path, train_data_filename)
 test_data_file_path=os.path.join(extracted_data_path, test_data_filename)
-
-print(f'train data file path, {train_data_file_path}')
-print(f'test data file path, {test_data_file_path}')
 
 def extract_bathroom_number(text):
     if pd.isna(text):
@@ -43,6 +44,7 @@ def count_amenities(amenity_string):
         return len(amenity_list)
     except:
         return 0
+    
 
 def pre_preprocessing(df: pd.DataFrame):
 
@@ -57,7 +59,8 @@ def pre_preprocessing(df: pd.DataFrame):
         df['host_is_superhost']=df['host_is_superhost'].fillna(df['host_is_superhost'].mode()[0])
 
         value_couns=df['host_total_listings_count'].value_counts()
-        df['host_total_listings_count']=df['host_total_listings_count'].fillna(int(value_couns)) # here we impute the missing value with the average of top 15 value occurences. 
+        value=int(sum(value_couns.values[:10])/10)
+        df['host_total_listings_count']=df['host_total_listings_count'].fillna(value) # here we impute the missing value with the average of top 10 value occurences. 
         
         df['host_verifications']=df['host_verifications'].fillna(df['host_verifications'].mode()[0])
         df['host_has_profile_pic']=df['host_has_profile_pic'].fillna(df['host_has_profile_pic'].mode()[0])
@@ -107,10 +110,10 @@ def pre_preprocessing(df: pd.DataFrame):
         df['room_type']=df['room_type'].replace({'Hotel room': 'Other', 'Shared room': 'Other'})
         df=pd.get_dummies(df, columns=['room_type'], drop_first=True, dtype=int)
 
-        df['bathroom_count']=df['bathroom_count'].apply(extract_bathroom_number)
+        df['bathroom_count']=df['bathrooms_text'].apply(extract_bathroom_number)
         df.drop(columns=['bathrooms_text'], inplace=True)
 
-        df['amenity_count']=df['amenity_count'].apply(lambda x: count_amenities(x))
+        df['amenity_count']=df['amenities'].apply(lambda x: count_amenities(x))
         df.drop(columns=['amenities'], inplace=True)
 
         df['has_availability']=df['has_availability'].apply(lambda x: 1 if x=='t' else 0)
@@ -121,12 +124,59 @@ def pre_preprocessing(df: pd.DataFrame):
 
         df['instant_bookable']=df['instant_bookable'].apply(lambda x: 1 if x=='t' else 0)
 
+        df.drop(columns=['host_name'], inplace=True)
 
+        df.drop(columns=['description'], inplace=True)
+
+        df['host_response_time']=df['host_response_time'].replace({'within an hour': 5, 'within a few hours': 4, 'within a day': 3, 'a few days or more': 2, 'not specified': 1})
 
         logger.info('null values pre-processed successfully')
+
+        return df
 
     except Exception as e:
         logger.error('Unexpected error, %s', e)
 
+def main():
 
+    try:
 
+        train_df=pd.read_csv(train_data_file_path)
+        test_df=pd.read_csv(test_data_file_path)
+
+        train_pre_processed=pre_preprocessing(train_df)
+        test_pre_processed=pre_preprocessing(test_df)
+
+        for i in ['name', 'host_location']: # Here we perform tfid on these columns
+
+            tfidf=TfidfVectorizer(stop_words='english', max_features=20)
+
+            x_train=tfidf.fit_transform(train_pre_processed[i])
+            x_test=tfidf.transform(test_pre_processed[i])
+
+            Train_df=pd.DataFrame(x_train.toarray(), columns=tfidf.get_feature_names_out())
+            Test_df=pd.DataFrame(x_test.toarray(), columns=tfidf.get_feature_names_out())
+
+            train_pre_processed=train_pre_processed.reset_index(drop=True)
+            Train_df=Train_df.reset_index(drop=True)
+
+            test_pre_processed=test_pre_processed.reset_index(drop=True)
+            Test_df=Test_df.reset_index(drop=True)
+
+            train_pre_processed=pd.concat([train_pre_processed, Train_df], axis=1)
+            test_pre_processed=pd.concat([test_pre_processed, Test_df], axis=1)
+
+            train_pre_processed.drop(columns=[i], inplace=True)
+            test_pre_processed.drop(columns=[i], inplace=True)
+        
+        train_pre_processed.to_csv(os.path.join(processed_path, 'pre_processed_train.csv'))
+        test_pre_processed.to_csv(os.path.join(processed_path, 'pre_processed_test.csv'))  
+
+        logger.info('train and test data pre-processed successfully')      
+
+    except Exception as e:
+        logger.error('Unexpected Error, %e', e)
+        raise 
+
+if __name__=='__main__':
+    main()
