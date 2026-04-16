@@ -74,14 +74,8 @@ def pre_preprocessing(df: pd.DataFrame):
         df['minimum_maximum_nights']=df['minimum_maximum_nights'].fillna(df['minimum_maximum_nights'].mode()[0])
         df['maximum_maximum_nights']=df['maximum_maximum_nights'].fillna(df['maximum_maximum_nights'].mode()[0])
 
-        df['has_availability']=df['has_availability'].fillna(df['has_availability'].mode()[0])
-
         row_indexes=df.index[df['first_review'].isnull()].tolist()
         df.drop(index=row_indexes, inplace=True)
-
-        df['host_response_rate']=df['host_response_rate'].apply(lambda x: int(x[:-1]))
-        df['host_acceptance_rate']=df['host_acceptance_rate'].apply(lambda x: int(x[:-1]))
-        df['host_is_superhost']=df['host_is_superhost'].apply(lambda x: 1 if x=='t' else 0)
         
         indexes=df['host_verifications'].value_counts().index
         hverification_encoder={}
@@ -91,12 +85,6 @@ def pre_preprocessing(df: pd.DataFrame):
             j+=1
         
         df['host_verifications']=df['host_verifications'].apply(lambda x: hverification_encoder.get(x))
-
-        df['host_has_profile_pic']=df['host_has_profile_pic'].apply(lambda x: 1 if x=='t' else 0)
-
-        df['host_identity_verified']=df['host_identity_verified'].apply(lambda x: 1 if x=='t' else 0)
-
-        df['price']=df['price'].apply(lambda x: float(x[1:].replace(',', '')))
 
         neighbour_cleansed=df.groupby('neighbourhood_cleansed')['price'].mean()
         df['neighbourhood_cleansed_encoded']=df['neighbourhood_cleansed'].map(neighbour_cleansed)
@@ -116,19 +104,9 @@ def pre_preprocessing(df: pd.DataFrame):
         df['amenity_count']=df['amenities'].apply(lambda x: count_amenities(x))
         df.drop(columns=['amenities'], inplace=True)
 
-        df['has_availability']=df['has_availability'].apply(lambda x: 1 if x=='t' else 0)
-
-        df['first_review']=df['first_review'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').year)
-
-        df['last_review']=df['last_review'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').year)
-
-        df['instant_bookable']=df['instant_bookable'].apply(lambda x: 1 if x=='t' else 0)
-
         df.drop(columns=['host_name'], inplace=True)
 
         df.drop(columns=['description'], inplace=True)
-
-        df['host_response_time']=df['host_response_time'].replace({'within an hour': 5, 'within a few hours': 4, 'within a day': 3, 'a few days or more': 2, 'not specified': 1})
 
         logger.info('null values pre-processed successfully')
 
