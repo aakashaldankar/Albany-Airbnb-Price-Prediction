@@ -25,8 +25,8 @@ def pre_processing(df: pd.DataFrame):
         logger.info(f'{len(row_indices)} rows having null/no prices are dropped successfully')
         df.drop(["id","listing_url",'scrape_id','last_scraped','source','picture_url','host_id',
                  'host_url','host_thumbnail_url','host_picture_url','host_listings_count',
-                 'neighbourhood_group_cleansed','calendar_updated','calendar_last_scraped','license',''
-                 'neighborhood_overview','host_about','host_neighbourhood','neighbourhood'], axis=1, inplace=True)
+                 'neighbourhood_group_cleansed','calendar_updated','calendar_last_scraped','license',
+                 'neighborhood_overview','host_about','host_neighbourhood','neighbourhood','estimated_occupancy_l365d','estimated_revenue_l365d'], axis=1, inplace=True)
         logger.info(f'Dropped all the redundant columns')
         return df
     
@@ -38,7 +38,7 @@ def save_data(df: pd.DataFrame, folder: str, file_name: str):
     try:
         path=os.path.join(data_path,folder, f'{file_name}.csv')
         os.makedirs(os.path.join(data_path,folder), exist_ok=True)
-        df.to_csv(path)
+        df.to_csv(path, index=False)
         logger.info(f"{file_name}.csv saved to, %s", path)
 
     except Exception as e:

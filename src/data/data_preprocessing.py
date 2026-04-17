@@ -77,8 +77,8 @@ def main():
         train_pre_processed=pre_preprocessing(train_df)
         test_pre_processed=pre_preprocessing(test_df)
       
-        train_pre_processed.to_csv(os.path.join(processed_path, 'pre_processed_train.csv'))
-        test_pre_processed.to_csv(os.path.join(processed_path, 'pre_processed_test.csv'))  
+        train_pre_processed.to_csv(os.path.join(processed_path, 'pre_processed_train.csv'), index=False)
+        test_pre_processed.to_csv(os.path.join(processed_path, 'pre_processed_test.csv'), index=False)  
 
         logger.info('train and test data pre-processed successfully')      
 

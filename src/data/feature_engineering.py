@@ -7,6 +7,7 @@ from sklearn.preprocessing import OneHotEncoder
 import re
 import ast
 import joblib
+import numpy as np
 
 script_name=os.path.basename(__file__)
 logger=get_logger(script_name)
@@ -59,10 +60,13 @@ def feature_transform(df: pd.DataFrame):
         df['host_has_profile_pic']=df['host_has_profile_pic'].apply(lambda x: 1 if x=='t' else 0)
         df['host_identity_verified']=df['host_identity_verified'].apply(lambda x: 1 if x=='t' else 0)
         df['price']=df['price'].apply(lambda x: float(x[1:].replace(',', '')))
+        df['price']=np.log1p(df['price']) # log(1 + price)
+        # Remember to inverse-transform predictions: np.expm1(y_pred)
 
         df['has_availability']=df['has_availability'].apply(lambda x: 1 if x=='t' else 0)
         df['first_review']=df['first_review'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').year)
         df['last_review']=df['last_review'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').year)
+        df['host_since']=df['host_since'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').year) 
 
         df['instant_bookable']=df['instant_bookable'].apply(lambda x: 1 if x=='t' else 0)
         
@@ -231,9 +235,10 @@ def main():
         artifacts.update({'host_location_tfidf_encoder': host_location_tfidf_encoder})
 
         joblib.dump(artifacts, os.path.join(encoder_path, 'feature_engineering_encoders.pkl'))
+        logger.info(f'saved the artifacts of feature encoders to {os.path.join(encoder_path, 'feature_engineering_encoders.pkl')}')
 
-        train_df.to_csv(os.path.join(save_data_path, 'final_train_data.csv'))
-        test_df.to_csv(os.path.join(save_data_path, 'final_test_data.csv'))
+        train_df.to_csv(os.path.join(save_data_path, 'final_train_data.csv'), index=False)
+        test_df.to_csv(os.path.join(save_data_path, 'final_test_data.csv'), index=False)
         
         logger.info('performed feature engineering successfully')
 
