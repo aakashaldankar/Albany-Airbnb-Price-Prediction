@@ -2,7 +2,8 @@
 venv_labs
 machine_learning_cycle
 venv
-central_data/
+central_data/pre_processed
+central_data/raw_data
 logs/
 __pycache__/
 feature_encoders/
