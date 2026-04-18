@@ -50,7 +50,7 @@ def main():
     try: 
         df=load_data('https://raw.githubusercontent.com/aakashaldankar/Albany-Airbnb-Listings-Data/refs/heads/main/listings.csv')
         pre_processed_df=pre_processing(df)
-        train_data, test_data = train_test_split(pre_processed_df, test_size=0.2, random_state=10, shuffle=True)
+        train_data, test_data = train_test_split(pre_processed_df, test_size=0.3, random_state=10, shuffle=True)
 
         save_data(train_data, folder='raw_data', file_name='train_data')
         save_data(test_data, folder='raw_data', file_name='test_data')

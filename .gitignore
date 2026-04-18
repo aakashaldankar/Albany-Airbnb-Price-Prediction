@@ -7,3 +7,4 @@ central_data/raw_data
 logs/
 __pycache__/
 feature_encoders/
+Local_Storage/
