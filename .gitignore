@@ -2,9 +2,9 @@
 venv_labs
 machine_learning_cycle
 venv
-central_data/pre_processed
-central_data/raw_data
+central_data/
 logs/
 __pycache__/
 feature_encoders/
 Local_Storage/
+mlflow.db

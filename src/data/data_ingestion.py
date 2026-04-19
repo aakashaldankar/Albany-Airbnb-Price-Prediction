@@ -2,10 +2,28 @@ from src.logger import get_logger
 import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
+import yaml
 
 script_name = os.path.basename(__file__)
 logger=get_logger(script_name)
 data_path='central_data'
+
+
+
+def load_params(params_path: str):
+        
+    try:
+
+        with open(params_path, 'r') as file:
+            params=yaml.safe_load(file)
+        
+        logger.info('loaded params successfully')
+        return params
+
+    except Exception as e:
+        logger.error('unexpected error occured, %s', e)
+        raise
+
 
 def load_data(url: str):
     try:
@@ -16,6 +34,7 @@ def load_data(url: str):
     except Exception as e:
         logger.error('Unexpected error, %s', e)
         raise
+
 
 def pre_processing(df: pd.DataFrame):
 
@@ -33,6 +52,7 @@ def pre_processing(df: pd.DataFrame):
     except Exception as e:
         logger.error('Unexpected error, %s', e)
 
+
 def save_data(df: pd.DataFrame, folder: str, file_name: str):
 
     try:
@@ -45,12 +65,18 @@ def save_data(df: pd.DataFrame, folder: str, file_name: str):
         logger.error('Unexpected error, %s', e)
         raise
 
+
+
 def main():
 
     try: 
+        params=load_params('params.yaml')
+        test_size=params['data_ingestion']['test_size']
+
         df=load_data('https://raw.githubusercontent.com/aakashaldankar/Albany-Airbnb-Listings-Data/refs/heads/main/listings.csv')
         pre_processed_df=pre_processing(df)
-        train_data, test_data = train_test_split(pre_processed_df, test_size=0.3, random_state=10, shuffle=True)
+
+        train_data, test_data = train_test_split(pre_processed_df, test_size=test_size, random_state=10, shuffle=True)
 
         save_data(train_data, folder='raw_data', file_name='train_data')
         save_data(test_data, folder='raw_data', file_name='test_data')

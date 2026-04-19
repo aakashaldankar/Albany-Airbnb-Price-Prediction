@@ -1,0 +1,28 @@
+stages:
+    
+    data_ingestion:
+        cmd: python3 -m src.data.data_ingestion
+        deps:
+            - src/data/data_ingestion.py
+        params:
+            - data_ingestion.test_size
+        outs:
+            - central_data/raw_data
+    
+    data_preprocessing:
+        cmd: python3 -m src.data.data_preprocessing
+        deps:
+            - src/data/data_preprocessing.py
+            - central_data/raw_data
+        outs: 
+            - central_data/pre_processed
+
+    feature_engineering:
+        cmd: python3 -m src.data.feature_engineering
+        deps: 
+            - src/data/feature_engineering.py
+            - central_data/pre_processed
+        params: 
+            - feature_engineering.max_features
+        outs: 
+            - central_data/feature_engineering

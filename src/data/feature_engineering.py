@@ -8,6 +8,7 @@ import re
 import ast
 import joblib
 import numpy as np
+import yaml
 
 script_name=os.path.basename(__file__)
 logger=get_logger(script_name)
@@ -24,7 +25,20 @@ os.makedirs(encoder_path, exist_ok=True)
 save_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering')
 os.makedirs(save_data_path, exist_ok=True)
 
+def load_params(params_path: str):
 
+    try: 
+
+        with open(params_path, 'r') as file:
+            params=yaml.safe_load(file)
+
+        logger.info('params loaded successfully')
+
+        return params
+    
+    except Exception as e:
+        logger.error('unexpected error occurred, %s', e)
+        raise
 
 def extract_bathroom_number(text):
     if pd.isna(text):
@@ -72,7 +86,7 @@ def feature_transform(df: pd.DataFrame):
         
         df['host_response_time']=df['host_response_time'].replace({'within an hour': 5, 'within a few hours': 4, 'within a day': 3, 'a few days or more': 2, 'not specified': 1})
 
-        df['bathroom_text']=df['bathrooms_text'].apply(extract_bathroom_number)
+        df['bathrooms_text']=df['bathrooms_text'].apply(extract_bathroom_number)
 
         df['amenities']=df['amenities'].apply(lambda x: count_amenities(x))
         
@@ -207,6 +221,9 @@ def main():
 
         artifacts={}
 
+        params=load_params('params.yaml')
+        max_features=params['feature_engineering']['max_features']
+
         train_df=pd.read_csv(os.path.join(data_path, 'pre_processed_train.csv'))
         test_df=pd.read_csv(os.path.join(data_path, 'pre_processed_test.csv'))
 
@@ -228,10 +245,10 @@ def main():
         train_df, test_df, room_type_ohe = one_hot_encoding(train_df=train_df, test_df=test_df, column_name='room_type')
         artifacts.update({'room_type_ohe': room_type_ohe})
 
-        train_df, test_df, name_tfidf_encoder = tfidf_nlp(train_df=train_df, test_df=test_df, column_name='name', max_features=20)
+        train_df, test_df, name_tfidf_encoder = tfidf_nlp(train_df=train_df, test_df=test_df, column_name='name', max_features=max_features)
         artifacts.update({'name_tfidf_encoder': name_tfidf_encoder})
 
-        train_df, test_df, host_location_tfidf_encoder = tfidf_nlp(train_df=train_df, test_df=test_df, column_name='host_location', max_features=20)
+        train_df, test_df, host_location_tfidf_encoder = tfidf_nlp(train_df=train_df, test_df=test_df, column_name='host_location', max_features=max_features)
         artifacts.update({'host_location_tfidf_encoder': host_location_tfidf_encoder})
 
         joblib.dump(artifacts, os.path.join(encoder_path, 'feature_engineering_encoders.pkl'))
