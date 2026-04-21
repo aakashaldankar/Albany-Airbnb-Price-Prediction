@@ -8,3 +8,6 @@ __pycache__/
 feature_encoders/
 Local_Storage/
 mlflow.db
+notebooks/mlruns
+plan.md
+Knowledge
