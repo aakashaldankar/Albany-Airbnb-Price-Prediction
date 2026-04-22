@@ -26,3 +26,13 @@ stages:
             - feature_engineering.max_features
         outs: 
             - central_data/feature_engineering
+
+    model_training:
+        cmd: python3 -m src.model.model_training
+        deps: 
+            - src/model/model_training.py
+            - central_data/feature_engineering
+        params: 
+            - model_training.hyper_parameters
+        outs:
+            - experiment_tracking

@@ -11,3 +11,5 @@ mlflow.db
 notebooks/mlruns
 plan.md
 Knowledge
+mlruns
+experiments

@@ -95,8 +95,7 @@ def feature_transform(df: pd.DataFrame):
         return df
 
     except Exception as e:
-
-        logger.error('Unexpected error, %e', e)
+        logger.error('Unexpected error, %s', e)
         raise
 
 
