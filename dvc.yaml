@@ -35,4 +35,4 @@ stages:
         params: 
             - model_training.hyper_parameters
         outs:
-            - experiment_tracking
+            - experiments

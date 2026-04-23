@@ -44,8 +44,8 @@ stages:
       nfiles: 2
     - path: src/data/feature_engineering.py
       hash: md5
-      md5: 004d9c2a9718787870f0719a3b3b7f07
-      size: 9985
+      md5: deac020a28946dd61718ba0e6d09d020
+      size: 9984
     params:
       params.yaml:
         feature_engineering.max_features: 20
@@ -55,3 +55,28 @@ stages:
       md5: ab918479d6c00bbdd3e3a1e475546e24.dir
       size: 2367368
       nfiles: 2
+  model_training:
+    cmd: python3 -m src.model.model_training
+    deps:
+    - path: central_data/feature_engineering
+      hash: md5
+      md5: ab918479d6c00bbdd3e3a1e475546e24.dir
+      size: 2367368
+      nfiles: 2
+    - path: src/model/model_training.py
+      hash: md5
+      md5: d3b537592418d21d71a8e81a026179c9
+      size: 3414
+    params:
+      params.yaml:
+        model_training.hyper_parameters:
+          n_estimators: 200
+          max_depth: 6
+          learning_rate: 0.1
+          subsample: 0.8
+    outs:
+    - path: experiments
+      hash: md5
+      md5: 8d362ab27635db3ff27ba79b52393a91.dir
+      size: 790837
+      nfiles: 33

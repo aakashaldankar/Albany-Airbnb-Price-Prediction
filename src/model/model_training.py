@@ -83,8 +83,8 @@ def main():
         os.makedirs(os.path.join(root_dir,'experiments', 'experiment_tracking'), exist_ok=True)
         # os.makedirs(os.path.join(root_dir,'experiments'), exist_ok=True)
 
+        mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiments','experiment_tracking')}")
         mlflow.set_experiment('Albany Experiment Tracking')
-        mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiment_tracking')}")
 
         params=load_params(params_path)
         model_hyper_parameters=params['model_training']['hyper_parameters']
