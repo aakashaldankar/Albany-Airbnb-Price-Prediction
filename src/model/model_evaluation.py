@@ -3,28 +3,35 @@ from mlflow.tracking import MlflowClient
 import json
 import os
 
-client=MlflowClient
-
 model_name='albany price predictor'
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-run_id_path = os.path.join(root_dir, 'run_info.json')
+tracking_uri = f"file://{os.path.join(root_dir, 'experiments', 'experiment_tracking')}"
+mlflow.set_tracking_uri(tracking_uri)
+
+client = MlflowClient()
+
+run_id_path = os.path.join(root_dir,'experiments','run_info.json')
 
 with open(run_id_path, 'r') as f:
     run_id=json.load(f)['run_id']
 
-threshold_metrics={"mean_absolute_error": 0.3, 
-                   "mean_squared_error": 0.3, 
-                   "root_mean_squared_error": 0.3}
-
 def register_model(run_id: str, model_name: str):
 
-    model_uri=f"runs:/{run_id}/model"
+    run = client.get_run(run_id)
+
+    logged_models = client.search_logged_models(
+        experiment_ids=[run.info.experiment_id],
+        filter_string=f"source_run_id = '{run_id}'")
+
+    if not logged_models:
+        raise ValueError(f"No logged model found for run_id: {run_id}")
+    
+    model_uri=logged_models[0].model_uri
     model_version=mlflow.register_model(model_uri, model_name)
     version=model_version.version
 
-    run=client.get_run(run_id)
     metrics=run.data.metrics
 
     return metrics, version
@@ -41,7 +48,7 @@ def get_prod_metrics(model_name: str):
 
     if not prod_version:
 
-        print(" Model {model_name} has no version in production stage")
+        print(f" Model {model_name} has no version in production stage")
         return None
     
     prod_run_id=prod_version[0].run_id
@@ -50,11 +57,18 @@ def get_prod_metrics(model_name: str):
 
 def beats_production(new_metrics: json, prod_metrics: json):
 
+    if prod_metrics is None:
+        return True
+
     return (new_metrics['mean_absolute_error']<prod_metrics['mean_absolute_error'] and 
             new_metrics['mean_squared_error']<prod_metrics['mean_squared_error'] and 
             new_metrics['root_mean_squared_error']>prod_metrics['root_mean_squared_error'])
 
 def main():
+
+    threshold_metrics={"mean_absolute_error": 0.3, 
+                    "mean_squared_error": 0.3, 
+                    "root_mean_squared_error": 0.3}
 
     metrics, version=register_model(run_id, model_name)
 

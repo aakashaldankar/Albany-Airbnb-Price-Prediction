@@ -9,11 +9,11 @@ stages:
       size: 2766
     params:
       params.yaml:
-        data_ingestion.test_size: 0.2
+        data_ingestion.test_size: 0.3
     outs:
     - path: central_data/raw_data
       hash: md5
-      md5: 0ac04c7648f148cba7119a62b67f6c62.dir
+      md5: 4bd71adb82910c656e9b68cd5cde4ef3.dir
       size: 8205719
       nfiles: 2
   data_preprocessing:
@@ -21,7 +21,7 @@ stages:
     deps:
     - path: central_data/raw_data
       hash: md5
-      md5: 0ac04c7648f148cba7119a62b67f6c62.dir
+      md5: 4bd71adb82910c656e9b68cd5cde4ef3.dir
       size: 8205719
       nfiles: 2
     - path: src/data/data_preprocessing.py
@@ -31,7 +31,7 @@ stages:
     outs:
     - path: central_data/pre_processed
       hash: md5
-      md5: 413f25be014e34437720eb9ef523c7dd.dir
+      md5: 67424fda48eeb5766bc8dc2d553b5667.dir
       size: 5412139
       nfiles: 2
   feature_engineering:
@@ -39,7 +39,7 @@ stages:
     deps:
     - path: central_data/pre_processed
       hash: md5
-      md5: 413f25be014e34437720eb9ef523c7dd.dir
+      md5: 67424fda48eeb5766bc8dc2d553b5667.dir
       size: 5412139
       nfiles: 2
     - path: src/data/feature_engineering.py
@@ -52,16 +52,16 @@ stages:
     outs:
     - path: central_data/feature_engineering
       hash: md5
-      md5: ab918479d6c00bbdd3e3a1e475546e24.dir
-      size: 2367368
+      md5: 15825460677f6e5a4c57f2c4f0f5c4ec.dir
+      size: 2363117
       nfiles: 2
   model_training:
     cmd: python3 -m src.model.model_training
     deps:
     - path: central_data/feature_engineering
       hash: md5
-      md5: ab918479d6c00bbdd3e3a1e475546e24.dir
-      size: 2367368
+      md5: 15825460677f6e5a4c57f2c4f0f5c4ec.dir
+      size: 2363117
       nfiles: 2
     - path: src/model/model_training.py
       hash: md5
@@ -75,8 +75,18 @@ stages:
           learning_rate: 0.1
           subsample: 0.8
     outs:
-    - path: experiments
+    - path: experiments/run_info.json
       hash: md5
-      md5: 8d362ab27635db3ff27ba79b52393a91.dir
-      size: 790837
-      nfiles: 33
+      md5: 4a3c28b6901d38ff60797dba052bdb01
+      size: 46
+  model_evaluation:
+    cmd: python -m src.model.model_evaluation
+    deps:
+    - path: experiments/run_info.json
+      hash: md5
+      md5: 4a3c28b6901d38ff60797dba052bdb01
+      size: 46
+    - path: src/model/model_evaluation.py
+      hash: md5
+      md5: f3dcfea16751d4710f0e251b3d7b3c64
+      size: 3078

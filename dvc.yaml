@@ -35,4 +35,10 @@ stages:
         params: 
             - model_training.hyper_parameters
         outs:
-            - experiments
+            - experiments/run_info.json
+
+    model_evaluation:
+        cmd: python -m src.model.model_evaluation
+        deps:
+            - experiments/run_info.json
+            - src/model/model_evaluation.py
