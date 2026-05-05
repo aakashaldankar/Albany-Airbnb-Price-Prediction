@@ -8,6 +8,12 @@ stages:
             - data_ingestion.test_size
         outs:
             - central_data/raw_data
+
+    data_validation:
+        cmd: python3 -m src.data.data_validation
+        deps: 
+            - central_data/raw_data
+            - src/data/data_validation.py
     
     data_preprocessing:
         cmd: python3 -m src.data.data_preprocessing

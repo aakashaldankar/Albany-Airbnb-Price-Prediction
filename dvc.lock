@@ -90,3 +90,15 @@ stages:
       hash: md5
       md5: f3dcfea16751d4710f0e251b3d7b3c64
       size: 3078
+  data_validation:
+    cmd: python3 -m src.data.data_validation
+    deps:
+    - path: central_data/raw_data
+      hash: md5
+      md5: 4bd71adb82910c656e9b68cd5cde4ef3.dir
+      size: 8205719
+      nfiles: 2
+    - path: src/data/data_validation.py
+      hash: md5
+      md5: c05b12e64f73e96ae3ba17a0e7ab968f
+      size: 3779
