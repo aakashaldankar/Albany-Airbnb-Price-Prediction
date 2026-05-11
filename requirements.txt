@@ -1,4 +1,5 @@
 joblib==1.5.3
+gradio==6.14.0
 mlflow==3.11.1
 mlflow_skinny==3.11.1
 mlflow_tracing==3.11.1

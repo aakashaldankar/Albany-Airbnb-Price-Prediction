@@ -188,10 +188,12 @@ def tfidf_nlp(train_df: pd.DataFrame, test_df: pd.DataFrame, column_name: str, m
         x_train=tfidf.fit_transform(train_df[column_name])
         x_test=tfidf.transform(test_df[column_name])
 
-        print(tfidf.get_feature_names_out())
+        # print(tfidf.get_feature_names_out())
 
-        Train_df=pd.DataFrame(x_train.toarray(), columns=tfidf.get_feature_names_out())
-        Test_df=pd.DataFrame(x_test.toarray(), columns=tfidf.get_feature_names_out())
+        feature_names = [f"{column_name}_{feature}" for feature in tfidf.get_feature_names_out()]
+
+        Train_df=pd.DataFrame(x_train.toarray(), columns=feature_names)
+        Test_df=pd.DataFrame(x_test.toarray(), columns=feature_names)
 
         train_df=train_df.reset_index(drop=True)
         test_df=test_df.reset_index(drop=True)
