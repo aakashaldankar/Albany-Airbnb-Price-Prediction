@@ -248,10 +248,12 @@ CSS = """
     margin: 0 0 8px;
     font-size: 2rem;
     line-height: 1.15;
+    color: #102a43;
+    font-weight: 700;
 }
 .app-header p {
     margin: 0;
-    color: #475467;
+    color: #334155;
     font-size: 1rem;
 }
 .result-panel {
