@@ -68,7 +68,7 @@ def save_data(df: pd.DataFrame, folder: str, file_name: str):
 
 
 def main():
-
+    
     try: 
         params=load_params('params.yaml')
         test_size=params['data_ingestion']['test_size']
