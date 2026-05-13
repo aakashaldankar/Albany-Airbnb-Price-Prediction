@@ -239,11 +239,16 @@ CSS = """
     padding: 20px 22px;
     background: linear-gradient(135deg, #f6fff8 0%, #edf6f9 100%);
 }
+
+.app-header,
+.app-header * {
+    color: #000000 !important;
+}
 .app-header h1 {
     margin: 0 0 8px;
     font-size: 2rem;
     line-height: 1.15;
-    color: #102a43;
+    color: #102a43 !important;
     font-weight: 700;
 }
 .app-header p {
