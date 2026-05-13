@@ -45,3 +45,5 @@ feature_encoders/
 !src/feature_encoders/
 src/feature_encoders/*
 !src/feature_encoders/feature_engineering_encoders.pkl
+
+ss.png
