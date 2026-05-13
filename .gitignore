@@ -1,0 +1,39 @@
+# Python/local runtime
+venv/
+venv_labs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local project artifacts
+central_data/
+logs/
+Local_Storage/
+Knowledge/
+plan.md
+mlflow.db
+mlruns/
+.dvc/
+.dvcignore
+dvc.lock
+dvc.yaml
+params.yaml
+notebooks/
+reports/
+src/data/
+src/model/
+app/fastapi_main.py
+notebooks/mlruns/
+notebooks/.ipynb_checkpoints/
+
+# DVC/local data caches
+.dvc/cache/
+*.dvc.tmp
+
+# Editor/OS files
+.DS_Store
+.vscode/
+.idea/
+
+
+ss.png

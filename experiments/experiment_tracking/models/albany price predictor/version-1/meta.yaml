@@ -1,0 +1,16 @@
+creation_timestamp: 1778410189221
+current_stage: Production
+deployment_job_state: null
+description: null
+last_updated_timestamp: 1778410189248
+model_id: m-3b35cb6aa5ea42dc8acac7f18249af9a
+name: albany price predictor
+run_id: 9b13a12cb9f5458c86446746d5261396
+run_link: null
+source: models:/m-3b35cb6aa5ea42dc8acac7f18249af9a
+status: READY
+status_message: null
+storage_location: file:./experiments/experiment_tracking/356382745981078133/models/m-3b35cb6aa5ea42dc8acac7f18249af9a/artifacts
+user_id: null
+version: 1
+workspace: default
