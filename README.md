@@ -1,5 +1,6 @@
+---
 title: Albany Price Predictor
-emoji: 📉
+emoji: 🏡
 colorFrom: pink
 colorTo: purple
 sdk: gradio
@@ -8,3 +9,5 @@ python_version: '3.13'
 app_file: app.py
 pinned: false
 license: mit
+short_description: 'Estimate Airbnb listing prices using machine learning and real-world listing data.'
+---
