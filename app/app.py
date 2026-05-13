@@ -462,6 +462,7 @@ def apply_preset(preset_name):
 
 with gr.Blocks(
     title="Albany Airbnb Price Predictor",
+    css=CSS,
 ) as demo:
     gr.HTML(
         """
@@ -661,4 +662,4 @@ with gr.Blocks(
 
 
 if __name__ == "__main__":
-    demo.launch(css=CSS, theme=gr.themes.Soft(primary_hue="teal", neutral_hue="slate"))
+    demo.launch(theme=gr.themes.Soft(primary_hue="teal", neutral_hue="slate"))
