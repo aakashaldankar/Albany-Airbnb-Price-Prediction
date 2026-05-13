@@ -103,6 +103,7 @@ def pre_process(data: dict):
                  'host_url','host_thumbnail_url','host_picture_url','host_listings_count',
                  'neighbourhood_group_cleansed','calendar_updated','calendar_last_scraped','license',
                  'neighborhood_overview','host_about','host_neighbourhood','neighbourhood','estimated_occupancy_l365d','estimated_revenue_l365d','host_name','description']
+    neighbourhood_cleansed = data['neighbourhood_cleansed']
     
     for key in drop_list:
         data.pop(key, None)
@@ -114,7 +115,7 @@ def pre_process(data: dict):
     data['host_response_time']=label_encoder[data['host_response_time']]
     
     #target encoding
-    data['neighbourhood_cleansed']=neighbourhood_cleansed_target_encoder[data['host_verifications']]
+    data['neighbourhood_cleansed']=neighbourhood_cleansed_target_encoder[neighbourhood_cleansed]
     data['property_type']=property_type_target_encoder[data['property_type']]
  
     #one hot encoding

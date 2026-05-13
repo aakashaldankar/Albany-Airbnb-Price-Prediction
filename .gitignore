@@ -1,15 +1,47 @@
-#folders
-venv_labs
-machine_learning_cycle
-venv
+# Python/local runtime
+venv/
+venv_labs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local project artifacts
 central_data/
 logs/
-__pycache__/
-feature_encoders/
 Local_Storage/
-mlflow.db
-notebooks/mlruns
+Knowledge/
 plan.md
-Knowledge
-mlruns
-experiments
+mlflow.db
+mlruns/
+.dvc/
+.dvcignore
+dvc.lock
+dvc.yaml
+params.yaml
+notebooks/
+reports/
+src/data/
+src/model/
+app/fastapi_main.py
+notebooks/mlruns/
+notebooks/.ipynb_checkpoints/
+
+# DVC/local data caches
+.dvc/cache/
+*.dvc.tmp
+
+# Editor/OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Ignore ad hoc MLflow outputs, but keep the deployment model registry.
+experiments/*
+!experiments/experiment_tracking/
+!experiments/experiment_tracking/**
+
+# Ignore ad hoc encoder outputs, but keep the deployment encoder artifact.
+feature_encoders/
+!src/feature_encoders/
+src/feature_encoders/*
+!src/feature_encoders/feature_engineering_encoders.pkl

@@ -1,4 +1,0 @@
-[core]
-    remote = local-remote
-['remote "local-remote"']
-    url = /home/aaic/Personal_Projects/Albany-Airbnb-Price-Prediction/Local_Storage

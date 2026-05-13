@@ -1,0 +1,14 @@
+artifact_uri: file:./experiments/experiment_tracking/356382745981078133/9b13a12cb9f5458c86446746d5261396/artifacts
+end_time: 1778410183279
+entry_point_name: ''
+experiment_id: '356382745981078133'
+lifecycle_stage: active
+run_id: 9b13a12cb9f5458c86446746d5261396
+run_name: XGBoost
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778410177691
+status: 3
+tags: []
+user_id: aaic
