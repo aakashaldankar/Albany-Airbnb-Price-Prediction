@@ -7,8 +7,9 @@ model_name='albany price predictor'
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-tracking_uri = f"file://{os.path.join(root_dir, 'experiments', 'experiment_tracking')}"
-mlflow.set_tracking_uri(tracking_uri)
+# tracking_uri = f"file://{os.path.join(root_dir, 'experiments', 'experiment_tracking')}"
+# mlflow.set_tracking_uri(tracking_uri)
+mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
 client = MlflowClient()
 
@@ -44,16 +45,21 @@ def is_eligible(metrics: json, threshold_metrics: json):
 
 def get_prod_metrics(model_name: str):
 
-    prod_version=client.get_latest_versions(model_name, stages=["Production"])
+    # prod_version=client.get_latest_versions(model_name, stages=["Production"])
+    try: 
+        prod_version=client.get_model_version_by_alias(model_name, "champion")
+        prod_run_id = prod_version.run_id
+        prod_run = client.get_run(prod_run_id)
 
-    if not prod_version:
 
-        print(f" Model {model_name} has no version in production stage")
+
+        return prod_run.data.metrics
+    
+    except: 
+        print(f" Model {model_name} does not have a champion")
         return None
     
-    prod_run_id=prod_version[0].run_id
-    prod_run=client.get_run(prod_run_id)
-    return prod_run.data.metrics
+    
 
 def beats_production(new_metrics: json, prod_metrics: json):
 
@@ -81,17 +87,18 @@ def main():
 
     if beats_production(metrics, prod_metrics):
 
-        old_prod=client.get_latest_versions(model_name, stages=["Production"])
-        
-        for old_version in old_prod:
-            client.transition_model_version_stage(model_name, old_version.version, "Archived")
+        if prod_metrics !=None:
+            # old_prod=client.get_latest_versions(model_name, stages=["Production"])
+            old_champ=client.get_model_version_by_alias(model_name, "champion")
+            old_champ_version=old_champ.version
+            client.set_registered_model_alias(model_name, "shadow", old_champ_version)
 
-        client.transition_model_version_stage(model_name, version, "Production")
+        client.set_registered_model_alias(model_name, "champion", version)
 
     else:
 
         print(f"Model v{version} passed baseline but didn't beat Production. Moving to staging")
-        client.transition_model_version_stage(model_name, version, "Staging")
+        client.set_registered_model_alias(model_name, "shadow", version)
 
 if __name__=="__main__":
     main()

@@ -47,7 +47,7 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
             mlflow.log_metric("mean_squared_error", mean_squared_error(y_test, preds))
             mlflow.log_metric('root_mean_squared_error', root_mean_squared_error(y_test, preds))
             
-            mlflow.xgboost.log_model(xgb, "xgboost_model")  # XGBoost has its own flavor
+            mlflow.xgboost.log_model(xgb_model=xgb, name="xgboost_model")  # XGBoost has its own flavor
 
             with open(os.path.join(root_dir,'experiments','run_info.json'),'w') as f:
                 json.dump({'run_id': run_id}, f)
@@ -80,10 +80,11 @@ def main():
         
     try:
 
-        os.makedirs(os.path.join(root_dir,'experiments', 'experiment_tracking'), exist_ok=True)
+        # os.makedirs(os.path.join(root_dir,'experiments', 'experiment_tracking'), exist_ok=True)
         # os.makedirs(os.path.join(root_dir,'experiments'), exist_ok=True)
 
-        mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiments','experiment_tracking')}")
+        # mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiments','experiment_tracking')}")
+        mlflow.set_tracking_uri("http://127.0.0.1:5000")
         mlflow.set_experiment('Albany Experiment Tracking')
 
         params=load_params(params_path)

@@ -12,7 +12,7 @@ property_type_target_encoder=encoders['property_type_target_encoder']
 name_tfidf_encoder=encoders['name_tfidf_encoder']
 host_location_tfidf_encoder=encoders['host_location_tfidf_encoder']
 
-model=load_model('albany price predictor','Production')
+model=load_model('albany price predictor','champion')
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
