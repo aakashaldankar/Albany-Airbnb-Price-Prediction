@@ -80,10 +80,6 @@ def main():
         
     try:
 
-        # os.makedirs(os.path.join(root_dir,'experiments', 'experiment_tracking'), exist_ok=True)
-        # os.makedirs(os.path.join(root_dir,'experiments'), exist_ok=True)
-
-        # mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiments','experiment_tracking')}")
         mlflow.set_tracking_uri("http://127.0.0.1:5000")
         mlflow.set_experiment('Albany Experiment Tracking')
 

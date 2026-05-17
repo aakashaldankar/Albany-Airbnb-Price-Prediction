@@ -2,6 +2,10 @@ import mlflow
 from mlflow.tracking import MlflowClient
 import json
 import os
+from src.logger import get_logger
+
+script=os.path.basename(__file__)
+logger=get_logger(script)
 
 model_name='albany price predictor'
 
@@ -20,22 +24,30 @@ with open(run_id_path, 'r') as f:
 
 def register_model(run_id: str, model_name: str):
 
-    run = client.get_run(run_id)
+    try: 
 
-    logged_models = client.search_logged_models(
-        experiment_ids=[run.info.experiment_id],
-        filter_string=f"source_run_id = '{run_id}'")
+        run = client.get_run(run_id)
 
-    if not logged_models:
-        raise ValueError(f"No logged model found for run_id: {run_id}")
+        logged_models = client.search_logged_models(
+            experiment_ids=[run.info.experiment_id],
+            filter_string=f"source_run_id = '{run_id}'")
+
+        if not logged_models:
+            raise ValueError(f"No logged model found for run_id: {run_id}")
+        
+        model_uri=logged_models[0].model_uri
+        model_version=mlflow.register_model(model_uri, model_name)
+        version=model_version.version
+
+        metrics=run.data.metrics
+
+        logger.info(f'registered the model, {model_name} with version {version} in model registry')
+
+        return metrics, version
     
-    model_uri=logged_models[0].model_uri
-    model_version=mlflow.register_model(model_uri, model_name)
-    version=model_version.version
-
-    metrics=run.data.metrics
-
-    return metrics, version
+    except Exception as e:
+        logger.error('Unexpected error occured, %s')
+        raise
 
 def is_eligible(metrics: json, threshold_metrics: json):
 
@@ -51,14 +63,13 @@ def get_prod_metrics(model_name: str):
         prod_run_id = prod_version.run_id
         prod_run = client.get_run(prod_run_id)
 
-
+        logger.info('successfully extracted metrics of champ model')
 
         return prod_run.data.metrics
     
-    except: 
-        print(f" Model {model_name} does not have a champion")
-        return None
-    
+    except Exception as e:
+        logger.error(f" Model {model_name} does not have a champion, %s")
+        raise
     
 
 def beats_production(new_metrics: json, prod_metrics: json):
@@ -71,34 +82,43 @@ def beats_production(new_metrics: json, prod_metrics: json):
             new_metrics['root_mean_squared_error']>prod_metrics['root_mean_squared_error'])
 
 def main():
-
-    threshold_metrics={"mean_absolute_error": 0.3, 
-                    "mean_squared_error": 0.3, 
-                    "root_mean_squared_error": 0.3}
-
-    metrics, version=register_model(run_id, model_name)
-
-    if not is_eligible(metrics, threshold_metrics):
-        print("model is not eligible so skipping")
         
-        return 
-    
-    prod_metrics=get_prod_metrics(model_name)
+    try:
 
-    if beats_production(metrics, prod_metrics):
+        threshold_metrics={"mean_absolute_error": 0.3, 
+                        "mean_squared_error": 0.3, 
+                        "root_mean_squared_error": 0.3}
 
-        if prod_metrics !=None:
-            # old_prod=client.get_latest_versions(model_name, stages=["Production"])
-            old_champ=client.get_model_version_by_alias(model_name, "champion")
-            old_champ_version=old_champ.version
-            client.set_registered_model_alias(model_name, "shadow", old_champ_version)
+        metrics, version=register_model(run_id, model_name)
 
-        client.set_registered_model_alias(model_name, "champion", version)
+        if not is_eligible(metrics, threshold_metrics):
+            print("model is not eligible so skipping")
+            
+            return 
+        
+        prod_metrics=get_prod_metrics(model_name)
 
-    else:
+        if beats_production(metrics, prod_metrics):
 
-        print(f"Model v{version} passed baseline but didn't beat Production. Moving to staging")
-        client.set_registered_model_alias(model_name, "shadow", version)
+            if prod_metrics !=None:
+                # old_prod=client.get_latest_versions(model_name, stages=["Production"])
+                old_champ=client.get_model_version_by_alias(model_name, "champion")
+                old_champ_version=old_champ.version
+                client.set_registered_model_alias(model_name, "shadow", old_champ_version)
+
+                logger.info(f"changed the alias of the earlier champion model, {model_name} of version {old_champ_version} to 'shadow' ")
+
+            client.set_registered_model_alias(model_name, "champion", version)
+            logger.info(f"registered model, {model_name} of version {version} as the new 'champion' model.")
+
+        else:
+
+            logger.info(f"Model v{version} passed baseline but didn't beat Production. Moving to staging")
+            client.set_registered_model_alias(model_name, "shadow", version)
+
+    except Exception as e:
+        logger.error('unexpected error occured, %s')
+        raise
 
 if __name__=="__main__":
     main()
