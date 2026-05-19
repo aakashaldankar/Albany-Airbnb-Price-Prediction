@@ -51,6 +51,7 @@ def pre_processing(df: pd.DataFrame):
     
     except Exception as e:
         logger.error('Unexpected error, %s', e)
+        raise
 
 
 def save_data(df: pd.DataFrame, folder: str, file_name: str):
@@ -72,8 +73,9 @@ def main():
     try: 
         params=load_params('params.yaml')
         test_size=params['data_ingestion']['test_size']
+        data_url=params['data_ingestion']['data_url']
 
-        df=load_data('https://raw.githubusercontent.com/aakashaldankar/Albany-Airbnb-Listings-Data/refs/heads/main/listings.csv')
+        df=load_data(data_url)
         pre_processed_df=pre_processing(df)
 
         train_data, test_data = train_test_split(pre_processed_df, test_size=test_size, random_state=10, shuffle=True)
