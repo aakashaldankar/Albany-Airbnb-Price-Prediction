@@ -49,7 +49,6 @@ def test_main(monkeypatch, tmp_path):
     monkeypatch.setattr('src.data.data_preprocessing.train_data_file_path',mock_train_path)
     monkeypatch.setattr('src.data.data_preprocessing.test_data_file_path',mock_test_path)
     monkeypatch.setattr('src.data.data_preprocessing.processed_path',tmp_path)
-    monkeypatch.setattr('src.data.data_preprocessing.processed_path',tmp_path)
     monkeypatch.setattr('src.data.data_preprocessing.pre_preprocessing',mock_pre_processing)
 
     main()

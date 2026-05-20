@@ -84,7 +84,7 @@ def feature_transform(df: pd.DataFrame):
 
         df['instant_bookable']=df['instant_bookable'].apply(lambda x: 1 if x=='t' else 0)
         
-        df['host_response_time']=df['host_response_time'].replace({'within an hour': 5, 'within a few hours': 4, 'within a day': 3, 'a few days or more': 2, 'not specified': 1})
+        df['host_response_time']=df['host_response_time'].map({'within an hour': 5, 'within a few hours': 4, 'within a day': 3, 'a few days or more': 2, 'not specified': 1})
 
         df['bathrooms_text']=df['bathrooms_text'].apply(extract_bathroom_number)
 

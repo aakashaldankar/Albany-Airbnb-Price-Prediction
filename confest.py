@@ -125,3 +125,36 @@ def sample_dataframe():
         'reviews_per_month': [1.87, 3.99, 4.81, 0.23, 0.19]
     })
 
+@pytest.fixture
+def sample_feature_df():
+
+    return pd.DataFrame({
+
+        "host_response_rate": ["90%"],
+
+        "host_acceptance_rate": ["80%"],
+
+        "host_is_superhost": ["t"],
+
+        "host_has_profile_pic": ["t"],
+
+        "host_identity_verified": ["f"],
+
+        "price": ["$100.00"],
+
+        "has_availability": ["t"],
+
+        "first_review": ["2020-01-01"],
+
+        "last_review": ["2024-01-01"],
+
+        "host_since": ["2015-01-01"],
+
+        "instant_bookable": ["f"],
+
+        "host_response_time": ["within an hour"],
+
+        "bathrooms_text": ["1.5 baths"],
+
+        "amenities": ["['Wifi', 'TV']"]
+    })
