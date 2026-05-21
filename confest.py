@@ -131,30 +131,34 @@ def sample_feature_df():
     return pd.DataFrame({
 
         "host_response_rate": ["90%"],
-
         "host_acceptance_rate": ["80%"],
-
         "host_is_superhost": ["t"],
-
         "host_has_profile_pic": ["t"],
-
         "host_identity_verified": ["f"],
-
         "price": ["$100.00"],
-
         "has_availability": ["t"],
-
         "first_review": ["2020-01-01"],
-
         "last_review": ["2024-01-01"],
-
         "host_since": ["2015-01-01"],
-
         "instant_bookable": ["f"],
-
         "host_response_time": ["within an hour"],
-
         "bathrooms_text": ["1.5 baths"],
-
         "amenities": ["['Wifi', 'TV']"]
     })
+
+@pytest.fixture
+def sample_train_data():
+
+    train_data=pd.DataFrame({
+        "feature1": [1,2,3,4,5],
+        "feature2":[23,56,87,12,11],
+        "price":[234,5432,765,455,985]
+    })
+
+    test_data=pd.DataFrame({
+        "feature1":[4,6,1,5,9],
+        "feature2":[2,9,0,3,1],
+        "price":[345,678,100,390,999]
+    })
+
+    return train_data, test_data

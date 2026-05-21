@@ -13,6 +13,9 @@ logger=get_logger(script)
 # root_dir=os.path.dirname(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
+run_id_path=os.path.join(root_dir,'experiments')
+os.makedirs(run_id_path,exist_ok=True)
+
 train_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_train_data.csv')
 test_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_test_data.csv')
 
@@ -42,10 +45,11 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
             xgb = XGBRegressor(**params)
             xgb.fit(X_train, y_train)
             preds = xgb.predict(X_test)
-            
+            print("REACHED LOG MODEL")
             mlflow.log_metric("mean_absolute_error", mean_absolute_error(y_test, preds))
             mlflow.log_metric("mean_squared_error", mean_squared_error(y_test, preds))
             mlflow.log_metric('root_mean_squared_error', root_mean_squared_error(y_test, preds))
+            
             
             mlflow.xgboost.log_model(xgb_model=xgb, name="xgboost_model")  # XGBoost has its own flavor
 

@@ -141,8 +141,8 @@ def test_main(tmp_path, monkeypatch):
     assert calls["feature_transform"]
     assert calls["label_encoding"]
     assert calls["one_hot_encoding"]
-    assert calls["target_encoding"]
-    assert calls["tfidf_nlp"]
+    assert calls["target_encoding"]==2
+    assert calls["tfidf_nlp"]==2
     assert saved_path1.exists
     assert saved_path2.exists
     assert saved_path3.exists
