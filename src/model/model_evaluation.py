@@ -53,7 +53,7 @@ def is_eligible(metrics: json, threshold_metrics: json):
 
     return (metrics['mean_absolute_error']<threshold_metrics['mean_absolute_error'] and 
             metrics['mean_squared_error']<threshold_metrics['mean_squared_error'] and 
-            metrics['root_mean_squared_error']>threshold_metrics['root_mean_squared_error'])
+            metrics['root_mean_squared_error']<threshold_metrics['root_mean_squared_error'])
 
 def get_prod_metrics(model_name: str):
 
@@ -79,7 +79,7 @@ def beats_production(new_metrics: json, prod_metrics: json):
 
     return (new_metrics['mean_absolute_error']<prod_metrics['mean_absolute_error'] and 
             new_metrics['mean_squared_error']<prod_metrics['mean_squared_error'] and 
-            new_metrics['root_mean_squared_error']>prod_metrics['root_mean_squared_error'])
+            new_metrics['root_mean_squared_error']<prod_metrics['root_mean_squared_error'])
 
 def main():
         

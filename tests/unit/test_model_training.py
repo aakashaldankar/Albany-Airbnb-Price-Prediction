@@ -1,7 +1,10 @@
 from src.model.model_training import train_model, load_params, main
-# from confest import sample_train_data
+from confest import sample_train_data
 from contextlib import contextmanager
 import os
+import mlflow.xgboost
+import yaml
+import pandas as pd
 
 def test_load_params():
 
@@ -60,10 +63,58 @@ def test_train_model(tmp_path, sample_train_data, monkeypatch):
     assert calls["log_model"]
     
 
+def test_main(monkeypatch, tmp_path):
+
+    calls={
+        "mock_set_tracking": False,
+        "set_experiment": False,
+        "train_model": False,
+        "read_csv": 0
+    }
+
+    def mock_set_tracking_uri(uri):
+
+        calls["mock_set_tracking"]=True
+        assert uri=="http://127.0.0.1:5000"
 
 
+    def mock_set_experiment(name):
 
+        calls["set_experiment"]=True
+        assert name=='Albany Experiment Tracking'
+
+    def mock_train_model(train_df, test_df, params):
+
+        calls["train_model"]=True
+        assert params==3
+
+    def mock_read_csv(path):
+
+        calls['read_csv']+=1
+        return pd.DataFrame({
+            "feature1":[1,2,3],
+            "price":[2,5,7]
+        })
+
+    params={
+        "model_training": {"hyper_parameters": 3}
+    }
+
+    with open(tmp_path/"params.yaml", "w") as f:
+        yaml.dump(params,f)
+
+    mock_params_path=tmp_path/"params.yaml"
+
+    monkeypatch.setattr('src.model.model_training.mlflow.set_tracking_uri', mock_set_tracking_uri)
+    monkeypatch.setattr('src.model.model_training.mlflow.set_experiment', mock_set_experiment)
+    monkeypatch.setattr('src.model.model_training.train_model', mock_train_model)
+    monkeypatch.setattr('src.model.model_training.params_path', mock_params_path)
+    monkeypatch.setattr('src.model.model_training.pd.read_csv', mock_read_csv)
     
+    main()
 
-
+    assert calls["mock_set_tracking"]
+    assert calls["read_csv"]==2
+    assert calls["set_experiment"]
+    assert calls["train_model"]
 
