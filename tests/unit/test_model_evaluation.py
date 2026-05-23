@@ -41,9 +41,115 @@ def test_register_model(monkeypatch):
     assert metrics=={'mean_absolute_error': 0.54, 'mean_squared_error': 0.45,'root_mean_squared_error': 0.67}
     assert version==1
 
+def test_is_eligible():
 
+    metrics={'mean_absolute_error': 1, 'mean_squared_error': 1,'root_mean_squared_error': 1}
+    threshold_metrics={'mean_absolute_error': 2, 'mean_squared_error': 2,'root_mean_squared_error': 2}
+
+    assert is_eligible(metrics, threshold_metrics)
+
+def test_get_prod_metrics(monkeypatch):
+
+    class ProdVersion:
+
+        run_id=10
+
+    class GetRun:
+
+        class data:
+
+            metrics={'mean_absolute_error': 0.54, 'mean_squared_error': 0.45,'root_mean_squared_error': 0.67}
+
+    def mock_get_model_version_by_alias(model_name, name):
+
+        return ProdVersion
     
+    def mock_get_run(prod_run_id):
 
+        return GetRun
     
+    monkeypatch.setattr('src.model.model_evaluation.client.get_model_version_by_alias',mock_get_model_version_by_alias)
+    monkeypatch.setattr('src.model.model_evaluation.client.get_run',mock_get_run)
 
+    model_name='test_model'
 
+    result=get_prod_metrics(model_name)
+
+    assert result=={'mean_absolute_error': 0.54, 'mean_squared_error': 0.45,'root_mean_squared_error': 0.67}
+
+def test_beats_production():
+
+    new_metrics={'mean_absolute_error': 1, 'mean_squared_error': 1,'root_mean_squared_error': 1}
+    prod_metrics={'mean_absolute_error': 2, 'mean_squared_error': 2,'root_mean_squared_error': 2}
+
+    result=beats_production(new_metrics, prod_metrics)
+
+    assert result
+
+def test_main(monkeypatch):
+
+    calls={
+        "register_model": False,
+        "is_eligible": False,
+        "get_prod_metrics": False,
+        "beats_production": False,
+        "get_model_version_by_alias": False,
+        "set_registered_model_alias": 0
+    }
+
+    def mock_register_model(run_id, model_name):
+
+        calls["register_model"]=True
+        metrics={'mean_absolute_error': 1, 'mean_squared_error': 1,'root_mean_squared_error': 1}
+        version=1
+
+        return metrics, version
+
+    def mock_is_eligible(metrics, threshold):
+
+        calls["is_eligible"]=True
+
+        return True
+    
+    def mock_get_prod_metrics(model_name):
+        
+        calls["get_prod_metrics"]=True
+        metrics={'mean_absolute_error': 2, 'mean_squared_error': 2,'root_mean_squared_error': 2}
+
+        return metrics
+    
+    def mock_beats_production(metrics, prod_metrics):
+
+        calls["beats_production"]=True
+        return True
+    
+    class GetModelVersion:
+
+        version=1
+
+    def mock_get_model_version_by_alias(model_name, name):
+
+        calls["get_model_version_by_alias"]=True
+
+        return GetModelVersion
+    
+    def mock_set_registered_model_alias(model_name, name, old_champ_version):
+
+        calls["set_registered_model_alias"]+=1
+
+    monkeypatch.setattr("src.model.model_evaluation.register_model",mock_register_model)
+    monkeypatch.setattr("src.model.model_evaluation.is_eligible",mock_is_eligible)
+    monkeypatch.setattr("src.model.model_evaluation.get_prod_metrics",mock_get_prod_metrics)
+    monkeypatch.setattr("src.model.model_evaluation.beats_production",mock_beats_production)
+    monkeypatch.setattr("src.model.model_evaluation.client.get_model_version_by_alias",mock_get_model_version_by_alias)
+    monkeypatch.setattr("src.model.model_evaluation.client.set_registered_model_alias",mock_set_registered_model_alias)
+
+    main()
+
+    assert calls['beats_production']
+    assert calls['get_model_version_by_alias']
+    assert calls['get_prod_metrics']
+    assert calls['is_eligible']
+    assert calls['register_model']
+    assert calls['set_registered_model_alias']==2
+    

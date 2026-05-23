@@ -1,14 +1,27 @@
-from fastapi import FastAPI
-from app.prediction_pipeline import predict
+from fastapi import FastAPI, HTTPException, Depends
 from app.schemas import PredictionRequest, PredictionResult
 
 app=FastAPI()
 
+def get_predictor():
+    from app.prediction_pipeline import predict
+    return predict
+
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+
+    try: 
+        return {"status": "ok"}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Prediction Failed")
+
 
 @app.post("/predict", response_model=PredictionResult)
-def predict_price(request: PredictionRequest):
-    prediction=predict(request)
-    return PredictionResult(result=prediction)
+def predict_price(request: PredictionRequest, predictor=Depends(get_predictor)):
+
+    try: 
+        prediction=predictor(request)
+        return PredictionResult(result=prediction)
+    except Exception:
+        raise HTTPException(status_code=500, 
+                            detail="Prediction Failed")
