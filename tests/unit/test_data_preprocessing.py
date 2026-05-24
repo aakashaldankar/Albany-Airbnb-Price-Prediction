@@ -1,5 +1,4 @@
 from src.data.data_preprocessing import pre_preprocessing, main
-from confest import sample_dataframe
 import pandas as pd
 
 

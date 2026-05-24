@@ -1,5 +1,4 @@
 from src.data.feature_engineering import load_params, extract_bathroom_number, count_amenities, feature_transform, label_encoding, target_encoding, one_hot_encoding, tfidf_nlp, main
-from confest import sample_feature_df
 import numpy as np
 import pandas as pd
 import os

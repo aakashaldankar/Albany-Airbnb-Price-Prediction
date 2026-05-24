@@ -1,5 +1,4 @@
 from src.model.model_training import train_model, load_params, main
-from confest import sample_train_data
 from contextlib import contextmanager
 import os
 import mlflow.xgboost

@@ -1,5 +1,4 @@
 from src.data.data_ingestion import load_params, load_data, pre_processing, save_data, main
-from confest import sample_dataframe
 import pandas as pd
 
 def test_load_params():
