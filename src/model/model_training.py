@@ -84,11 +84,12 @@ def main():
         
     try:
 
-        mlflow.set_tracking_uri("http://127.0.0.1:5000")
-        mlflow.set_experiment('Albany Experiment Tracking')
-
         params=load_params(params_path)
         model_hyper_parameters=params['model_training']['hyper_parameters']
+        tracking_uri=params['tracking_uri']
+
+        mlflow.set_tracking_uri(tracking_uri)
+        mlflow.set_experiment('Albany Experiment Tracking')
 
         train_df=pd.read_csv(train_data_path)
         test_df=pd.read_csv(test_data_path)

@@ -12,3 +12,8 @@ model_training:
         max_depth: 6
         learning_rate: 0.1
         subsample: 0.8 
+    
+tracking_uri:
+    "http://127.0.0.1:5001"
+    # "file://{tmp_path}/mlruns"
+

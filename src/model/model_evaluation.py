@@ -3,6 +3,7 @@ from mlflow.tracking import MlflowClient
 import json
 import os
 from src.logger import get_logger
+import yaml
 
 script=os.path.basename(__file__)
 logger=get_logger(script)
@@ -13,16 +14,14 @@ root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # tracking_uri = f"file://{os.path.join(root_dir, 'experiments', 'experiment_tracking')}"
 # mlflow.set_tracking_uri(tracking_uri)
-mlflow.set_tracking_uri("http://127.0.0.1:5000")
-
-client = MlflowClient()
+# mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
 run_id_path = os.path.join(root_dir,'experiments','run_info.json')
 
 with open(run_id_path, 'r') as f:
     run_id=json.load(f)['run_id']
 
-def register_model(run_id: str, model_name: str):
+def register_model(run_id: str, model_name: str, client):
 
     try: 
 
@@ -55,7 +54,7 @@ def is_eligible(metrics: json, threshold_metrics: json):
             metrics['mean_squared_error']<threshold_metrics['mean_squared_error'] and 
             metrics['root_mean_squared_error']<threshold_metrics['root_mean_squared_error'])
 
-def get_prod_metrics(model_name: str):
+def get_prod_metrics(model_name: str, client):
 
     # prod_version=client.get_latest_versions(model_name, stages=["Production"])
     try: 
@@ -68,8 +67,8 @@ def get_prod_metrics(model_name: str):
         return prod_run.data.metrics
     
     except Exception as e:
-        logger.error(f" Model {model_name} does not have a champion, %s")
-        raise
+        logger.error(f"Failed to fetch champion metrics for model '{model_name}': {e}")
+        return None
     
 
 def beats_production(new_metrics: json, prod_metrics: json):
@@ -81,22 +80,43 @@ def beats_production(new_metrics: json, prod_metrics: json):
             new_metrics['mean_squared_error']<prod_metrics['mean_squared_error'] and 
             new_metrics['root_mean_squared_error']<prod_metrics['root_mean_squared_error'])
 
+def load_params(params_path: str):
+
+    try:
+
+        with open(params_path, 'r') as f:
+            params=yaml.safe_load(f)
+
+        logger.info('loaded hyper parameters successfully')
+        return params
+    
+    except Exception as e:
+        logger.error('unexpected error occurred, %s', e)
+        raise
+
 def main():
         
-    try:
+    try: 
+
+        params_path=os.path.join(root_dir, 'params.yaml')
+        params=load_params(params_path)
+        tracking_uri=params['tracking_uri']
+
+        mlflow.set_tracking_uri(tracking_uri)
+        client = MlflowClient()
 
         threshold_metrics={"mean_absolute_error": 0.3, 
                         "mean_squared_error": 0.3, 
                         "root_mean_squared_error": 0.3}
 
-        metrics, version=register_model(run_id, model_name)
+        metrics, version=register_model(run_id, model_name, client)
 
         if not is_eligible(metrics, threshold_metrics):
             print("model is not eligible so skipping")
             
             return 
         
-        prod_metrics=get_prod_metrics(model_name)
+        prod_metrics=get_prod_metrics(model_name, client)
 
         if beats_production(metrics, prod_metrics):
 
