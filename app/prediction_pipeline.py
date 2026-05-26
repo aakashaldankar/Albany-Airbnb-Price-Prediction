@@ -3,18 +3,15 @@ import os
 import pandas as pd
 import numpy as np
 
-encoders=load_encoders()
-
-host_verification_label_encoder=encoders['host_verification_label_encoder']
-neighbourhood_cleansed_target_encoder=encoders['neighbourhood_cleansed_target_encoder']
-room_type_ohe=encoders['room_type_ohe']
-property_type_target_encoder=encoders['property_type_target_encoder']
-name_tfidf_encoder=encoders['name_tfidf_encoder']
-host_location_tfidf_encoder=encoders['host_location_tfidf_encoder']
-
-model=load_model('albany price predictor','champion')
-
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+def get_encoders():
+    encoders=load_encoders()
+    return encoders
+
+def get_model():
+    model=load_model('albany price predictor','champion')
+    return model
 
 # request = PredictionRequest(
 
@@ -136,7 +133,7 @@ root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 # )
 
 
-def pre_process(data: dict):
+def pre_process(data: dict, encoders: dict=None):
 
     drop_list=["id","listing_url",'scrape_id','last_scraped','source','picture_url','host_id','price',
                  'host_url','host_thumbnail_url','host_picture_url','host_listings_count',
@@ -145,6 +142,16 @@ def pre_process(data: dict):
     
     for key in drop_list:
         data.pop(key, None)
+
+    if encoders is None:
+        encoders = get_encoders()
+
+    host_verification_label_encoder=encoders['host_verification_label_encoder']
+    neighbourhood_cleansed_target_encoder=encoders['neighbourhood_cleansed_target_encoder']
+    room_type_ohe=encoders['room_type_ohe']
+    property_type_target_encoder=encoders['property_type_target_encoder']
+    name_tfidf_encoder=encoders['name_tfidf_encoder']
+    host_location_tfidf_encoder=encoders['host_location_tfidf_encoder']
 
     #label encoding
     data['host_verifications']=host_verification_label_encoder[data['host_verifications']]
@@ -182,11 +189,18 @@ def pre_process(data: dict):
     return data
 
 
-def predict(request):
+def predict(request, model=None, encoders=None):
+
+    if model is None:
+        model = get_model()
+    
+    if encoders is None:
+        encoders = get_encoders()
 
     data=request.model_dump()
-    data=pre_process(data)
+    data=pre_process(data, encoders)
     data_df=pd.DataFrame([data])
+
     prediction=model.predict(data_df)
     
     return np.expm1(float(prediction[0]))
