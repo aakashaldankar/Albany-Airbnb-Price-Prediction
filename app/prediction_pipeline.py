@@ -189,7 +189,7 @@ def pre_process(data: dict, encoders: dict=None):
     return data
 
 
-def predict(request, model=None, encoders=None):
+def prediction(request, model=None, encoders=None):
 
     if model is None:
         model = get_model()
