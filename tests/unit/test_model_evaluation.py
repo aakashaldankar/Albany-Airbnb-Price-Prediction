@@ -85,7 +85,7 @@ def test_beats_production():
 
     assert result
 
-def test_main(monkeypatch):
+def test_main(monkeypatch, tmp_path):
 
     calls={
         "register_model": False,
@@ -135,6 +135,20 @@ def test_main(monkeypatch):
         def set_registered_model_alias(self, model_name, name, old_champ_version):
             calls["set_registered_model_alias"]+=1
 
+    mock_root_dir=tmp_path
+
+    mock_run_id_path=tmp_path/'experiments'
+    mock_run_id_path.mkdir()
+
+    run_id_file=mock_run_id_path/'run_info.json'
+
+    with open(run_id_file,'w') as f:
+        json.dump({"run_id": 1},f)
+
+    params_file=tmp_path/'params.yaml'
+
+    with open(params_file, 'w') as f:
+        json.dump({'tracking_uri': 1}, f)
 
     monkeypatch.setattr("src.model.model_evaluation.register_model",mock_register_model)
     monkeypatch.setattr("src.model.model_evaluation.is_eligible",mock_is_eligible)
@@ -142,6 +156,7 @@ def test_main(monkeypatch):
     monkeypatch.setattr("src.model.model_evaluation.beats_production",mock_beats_production)
     monkeypatch.setattr("src.model.model_evaluation.MlflowClient",MockMlflowClient)
     monkeypatch.setattr("src.model.model_evaluation.MlflowClient",MockMlflowClient)
+    monkeypatch.setattr("src.model.model_evaluation.root_dir",mock_root_dir)
 
     main()
 
