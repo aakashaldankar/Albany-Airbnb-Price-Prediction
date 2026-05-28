@@ -30,10 +30,10 @@ def test_register_model(monkeypatch, tmp_path):
     def mock_register_model(model_uri, model_name):
         return MockModelVersion
     
-    mock_run_id_path=tmp_path
+    mock_run_id_path=tmp_path/'run_info.json'
 
     with open(mock_run_id_path, 'w') as f:
-        json.dump({'run_id':1})
+        json.dump({'run_id':1},f)
 
     monkeypatch.setattr('src.model.model_evaluation.mlflow.register_model', mock_register_model)
     monkeypatch.setattr('src.model.model_evaluation.run_id_path', mock_run_id_path)
