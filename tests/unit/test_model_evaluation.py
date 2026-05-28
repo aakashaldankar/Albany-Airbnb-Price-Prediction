@@ -13,30 +13,32 @@ def test_register_model(monkeypatch):
                      'root_mean_squared_error': 0.67}
         
     class MockSeachedModels:
-
         model_uri='http:aakashaldankar.com'
 
-    class MockModelVersion:
+    class MockClient:
 
+        def get_run(self, run_id):
+            return MockRun
+        
+        def search_logged_models(self, experiment_ids, filter_string):
+            return [MockSeachedModels]
+
+    class MockModelVersion:
         version=1
 
-    def mock_get_run(run_id):
-        return MockRun
-    
-    def mock_search_logged_models(experiment_ids, filter_string):
-        return [MockSeachedModels]
-    
     def mock_register_model(model_uri, model_name):
         return MockModelVersion
     
-    monkeypatch.setattr('src.model.model_evaluation.client.get_run', mock_get_run)
-    monkeypatch.setattr('src.model.model_evaluation.client.search_logged_models', mock_search_logged_models)
+    # monkeypatch.setattr('src.model.model_evaluation.client.get_run', mock_get_run)
+    # monkeypatch.setattr('src.model.model_evaluation.client.search_logged_models', mock_search_logged_models)
     monkeypatch.setattr('src.model.model_evaluation.mlflow.register_model', mock_register_model)
 
     run_id=1
     model_name='test_model'
+    client=MockClient()
 
-    metrics, version=register_model(run_id, model_name)
+
+    metrics, version=register_model(run_id, model_name, client)
 
     assert metrics=={'mean_absolute_error': 0.54, 'mean_squared_error': 0.45,'root_mean_squared_error': 0.67}
     assert version==1
@@ -51,29 +53,28 @@ def test_is_eligible():
 def test_get_prod_metrics(monkeypatch):
 
     class ProdVersion:
-
         run_id=10
 
     class GetRun:
 
         class data:
-
             metrics={'mean_absolute_error': 0.54, 'mean_squared_error': 0.45,'root_mean_squared_error': 0.67}
 
-    def mock_get_model_version_by_alias(model_name, name):
+    class MockClient:
 
-        return ProdVersion
+        def get_model_version_by_alias(self, model_name, name):
+            return ProdVersion
+        
+        def get_run(self, prod_run_id):
+            return GetRun
     
-    def mock_get_run(prod_run_id):
-
-        return GetRun
-    
-    monkeypatch.setattr('src.model.model_evaluation.client.get_model_version_by_alias',mock_get_model_version_by_alias)
-    monkeypatch.setattr('src.model.model_evaluation.client.get_run',mock_get_run)
+    # monkeypatch.setattr('src.model.model_evaluation.client.get_model_version_by_alias',mock_get_model_version_by_alias)
+    # monkeypatch.setattr('src.model.model_evaluation.client.get_run',mock_get_run)
 
     model_name='test_model'
+    client=MockClient()
 
-    result=get_prod_metrics(model_name)
+    result=get_prod_metrics(model_name, client)
 
     assert result=={'mean_absolute_error': 0.54, 'mean_squared_error': 0.45,'root_mean_squared_error': 0.67}
 
@@ -97,7 +98,7 @@ def test_main(monkeypatch):
         "set_registered_model_alias": 0
     }
 
-    def mock_register_model(run_id, model_name):
+    def mock_register_model(run_id, model_name, client):
 
         calls["register_model"]=True
         metrics={'mean_absolute_error': 1, 'mean_squared_error': 1,'root_mean_squared_error': 1}
@@ -111,7 +112,7 @@ def test_main(monkeypatch):
 
         return True
     
-    def mock_get_prod_metrics(model_name):
+    def mock_get_prod_metrics(model_name, client):
         
         calls["get_prod_metrics"]=True
         metrics={'mean_absolute_error': 2, 'mean_squared_error': 2,'root_mean_squared_error': 2}
@@ -127,22 +128,22 @@ def test_main(monkeypatch):
 
         version=1
 
-    def mock_get_model_version_by_alias(model_name, name):
+    class MockMlflowClient:
 
-        calls["get_model_version_by_alias"]=True
+        def get_model_version_by_alias(self, model_name, name):
+            calls["get_model_version_by_alias"]=True
+            return GetModelVersion
+        
+        def set_registered_model_alias(self, model_name, name, old_champ_version):
+            calls["set_registered_model_alias"]+=1
 
-        return GetModelVersion
-    
-    def mock_set_registered_model_alias(model_name, name, old_champ_version):
-
-        calls["set_registered_model_alias"]+=1
 
     monkeypatch.setattr("src.model.model_evaluation.register_model",mock_register_model)
     monkeypatch.setattr("src.model.model_evaluation.is_eligible",mock_is_eligible)
     monkeypatch.setattr("src.model.model_evaluation.get_prod_metrics",mock_get_prod_metrics)
     monkeypatch.setattr("src.model.model_evaluation.beats_production",mock_beats_production)
-    monkeypatch.setattr("src.model.model_evaluation.client.get_model_version_by_alias",mock_get_model_version_by_alias)
-    monkeypatch.setattr("src.model.model_evaluation.client.set_registered_model_alias",mock_set_registered_model_alias)
+    monkeypatch.setattr("src.model.model_evaluation.MlflowClient",MockMlflowClient)
+    monkeypatch.setattr("src.model.model_evaluation.MlflowClient",MockMlflowClient)
 
     main()
 

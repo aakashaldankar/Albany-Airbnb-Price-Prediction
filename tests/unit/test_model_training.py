@@ -74,8 +74,7 @@ def test_main(monkeypatch, tmp_path):
     def mock_set_tracking_uri(uri):
 
         calls["mock_set_tracking"]=True
-        assert uri=="http://127.0.0.1:5000"
-
+        assert uri=="http://127.0.0.1:5001"
 
     def mock_set_experiment(name):
 
@@ -85,7 +84,9 @@ def test_main(monkeypatch, tmp_path):
     def mock_train_model(train_df, test_df, params):
 
         calls["train_model"]=True
-        assert params==3
+        assert train_df.shape[0]==3
+        assert test_df.shape[1]==2
+        assert params=={'learning_rate': 0.1, 'max_depth': 6, 'n_estimators': 200, 'subsample': 0.8}
 
     def mock_read_csv(path):
 
@@ -95,20 +96,10 @@ def test_main(monkeypatch, tmp_path):
             "price":[2,5,7]
         })
 
-    params={
-        "model_training": {"hyper_parameters": 3}
-    }
-
-    with open(tmp_path/"params.yaml", "w") as f:
-        yaml.dump(params,f)
-
-    mock_params_path=tmp_path/"params.yaml"
-
-    monkeypatch.setattr('src.model.model_training.mlflow.set_tracking_uri', mock_set_tracking_uri)
     monkeypatch.setattr('src.model.model_training.mlflow.set_experiment', mock_set_experiment)
     monkeypatch.setattr('src.model.model_training.train_model', mock_train_model)
-    monkeypatch.setattr('src.model.model_training.params_path', mock_params_path)
     monkeypatch.setattr('src.model.model_training.pd.read_csv', mock_read_csv)
+    monkeypatch.setattr('src.model.model_training.mlflow.set_tracking_uri', mock_set_tracking_uri)
     
     main()
 
