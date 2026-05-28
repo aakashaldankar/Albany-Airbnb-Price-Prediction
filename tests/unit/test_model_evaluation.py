@@ -1,7 +1,7 @@
 from src.model.model_evaluation import register_model, is_eligible, get_prod_metrics, beats_production, main
 import json
 
-def test_register_model(monkeypatch, tmp_path):
+def test_register_model(monkeypatch):
 
     class MockRun:
 
@@ -29,19 +29,12 @@ def test_register_model(monkeypatch, tmp_path):
 
     def mock_register_model(model_uri, model_name):
         return MockModelVersion
-    
-    mock_run_id_path=tmp_path/'run_info.json'
-
-    with open(mock_run_id_path, 'w') as f:
-        json.dump({'run_id':1},f)
 
     monkeypatch.setattr('src.model.model_evaluation.mlflow.register_model', mock_register_model)
-    monkeypatch.setattr('src.model.model_evaluation.run_id_path', mock_run_id_path)
 
     run_id=1
     model_name='test_model'
     client=MockClient()
-
 
     metrics, version=register_model(run_id, model_name, client)
 

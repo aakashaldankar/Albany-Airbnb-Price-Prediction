@@ -16,10 +16,6 @@ root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 # mlflow.set_tracking_uri(tracking_uri)
 # mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
-run_id_path = os.path.join(root_dir,'experiments','run_info.json')
-
-with open(run_id_path, 'r') as f:
-    run_id=json.load(f)['run_id']
 
 def register_model(run_id: str, model_name: str, client):
 
@@ -97,6 +93,11 @@ def load_params(params_path: str):
 def main():
         
     try: 
+
+        run_id_path = os.path.join(root_dir,'experiments','run_info.json')
+
+        with open(run_id_path, 'r') as f:
+            run_id=json.load(f)['run_id']
 
         params_path=os.path.join(root_dir, 'params.yaml')
         params=load_params(params_path)
