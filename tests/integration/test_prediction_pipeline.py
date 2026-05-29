@@ -18,7 +18,6 @@ def test_prediction_pipeline(prediction_request, monkeypatch):
             calls["predict"]=True
             return [np.log1p(100)]
         
-      
     monkeypatch.setattr('app.prediction_pipeline.pre_process',mock_pre_process)
     
     encoders={'ohe_one': 1, 'target_encoding':2}  

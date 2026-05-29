@@ -65,9 +65,6 @@ def test_get_prod_metrics(monkeypatch):
         
         def get_run(self, prod_run_id):
             return GetRun
-    
-    # monkeypatch.setattr('src.model.model_evaluation.client.get_model_version_by_alias',mock_get_model_version_by_alias)
-    # monkeypatch.setattr('src.model.model_evaluation.client.get_run',mock_get_run)
 
     model_name='test_model'
     client=MockClient()
