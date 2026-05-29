@@ -147,11 +147,3 @@ def test_main(tmp_path, monkeypatch):
     assert saved_path3.exists
     assert saved_path4.exists
     assert saved_path5.exists
-
-    
-    
-
-
-
-
-

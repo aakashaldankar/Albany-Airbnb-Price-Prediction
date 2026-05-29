@@ -8,7 +8,7 @@ import yaml
 @pytest.mark.integration
 @pytest.mark.slow
 def test_dvc_pipeline_runs_in_temp_workspace(tmp_path):
-    # mlflow.set_tracking_uri(f"file://{tmp_path}/mlruns")
+    
     project_root = Path(__file__).resolve().parents[2]
     temp_project = tmp_path / "project"
 
