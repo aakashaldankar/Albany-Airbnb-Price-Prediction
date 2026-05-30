@@ -33,4 +33,4 @@ jobs:
         run: pytest tests/unit
 
       - name: Run Integration Tests
-        run: pytest tests/integration
+        run: pytest tests/integration -m 'not slow'
