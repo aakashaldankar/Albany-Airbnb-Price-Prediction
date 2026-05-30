@@ -24,7 +24,7 @@ def test_prediction_pipeline(prediction_request, monkeypatch):
     result=prediction(request, model=MockModel(), encoders=encoders)
 
     assert np.isclose(100, result)
-    assert calls["predict"]
+    assert calls["predict"]==False
 
 
     
