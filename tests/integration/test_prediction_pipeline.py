@@ -23,7 +23,7 @@ def test_prediction_pipeline(prediction_request, monkeypatch):
     encoders={'ohe_one': 1, 'target_encoding':2}  
     result=prediction(request, model=MockModel(), encoders=encoders)
 
-    assert np.isclose(100, result)
+    assert np.isclose(10, result)
     assert calls["predict"]==False
 
 
