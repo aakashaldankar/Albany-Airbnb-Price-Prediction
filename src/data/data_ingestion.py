@@ -46,7 +46,7 @@ def pre_processing(df: pd.DataFrame):
                  'host_url','host_thumbnail_url','host_picture_url','host_listings_count',
                  'neighbourhood_group_cleansed','calendar_updated','calendar_last_scraped','license',
                  'neighborhood_overview','host_about','host_neighbourhood','neighbourhood','estimated_occupancy_l365d','estimated_revenue_l365d'], axis=1, inplace=True)
-        logger.info(f'Dropped all the redundant columns')
+        logger.info('Dropped all the redundant columns')
         return df
     
     except Exception as e:

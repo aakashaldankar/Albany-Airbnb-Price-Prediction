@@ -1,4 +1,4 @@
-from app.model_loader import load_model, load_encoders, main
+from app.model_loader import load_best_model, load_encoders, main
 import mlflow.pyfunc
 
 def test_load_model(monkeypatch):
@@ -13,14 +13,13 @@ def test_load_model(monkeypatch):
     
     monkeypatch.setattr("app.model_loader.mlflow.pyfunc.load_model",mock_load_model)
 
-    result=load_model("testmodel", "champion")
+    result=load_best_model("testmodel", "champion")
 
     assert isinstance(result, LoadModel)
 
 def test_load_encoders(monkeypatch, tmp_path):
 
     encoders={"target_encoders": 1234}
-    encoders_path=tmp_path
 
     def mock_load(encoders_path):
         return encoders
@@ -45,7 +44,7 @@ def test_main(monkeypatch):
     def mock_load_encoders():
         calls["loader_encoders"]=True
 
-    monkeypatch.setattr("app.model_loader.load_model", mock_load_model)
+    monkeypatch.setattr("app.model_loader.load_best_model", mock_load_model)
     monkeypatch.setattr("app.model_loader.load_encoders", mock_load_encoders)
 
     main()

@@ -1,10 +1,6 @@
 import pandas as pd
 import os
 from src.logger import get_logger
-import re
-import ast
-from datetime import datetime
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 script_name=os.path.basename(__file__)
 logger=get_logger(script_name)

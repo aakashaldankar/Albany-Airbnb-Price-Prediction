@@ -12,11 +12,10 @@ encoders_path = os.path.join(root_dir,'src','feature_encoders','feature_engineer
 # mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiments','experiment_tracking')}")
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
-def load_model(model_name:str, alias:str):
+def load_best_model(model_name:str, alias:str):
 
     try:
 
-        # model=mlflow.pyfunc.load_model(f"models:/{model_name}/{model_stage}")
         model = mlflow.pyfunc.load_model(f"models:/{model_name}@{alias}")
         logger.info(f"successfully loaded the model a {alias} {model_name} ")
         return model
@@ -34,11 +33,11 @@ def load_encoders():
         return encoders
     
     except Exception as e:
-        logger.error("unexpected error occured")
+        logger.error("unexpected error occured, %s", e)
         raise
 
 def main():
-    load_model('albany price predictor','Production')
+    load_best_model('albany price predictor','Production')
     load_encoders()
 
 if __name__=='__main__':

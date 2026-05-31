@@ -1,7 +1,6 @@
 import shutil
 import subprocess
 from pathlib import Path
-import mlflow
 import pytest
 import yaml
 
