@@ -60,7 +60,7 @@ def count_amenities(amenity_string):
     try:
         amenity_list = ast.literal_eval(amenity_string)
         return len(amenity_list)
-    except:
+    except Exception:
         return 0
 
 def feature_transform(df: pd.DataFrame):

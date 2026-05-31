@@ -1,6 +1,5 @@
 from app.prediction_pipeline import prediction
 import numpy as np
-import pandas as pd
 
 def test_prediction_pipeline(prediction_request, monkeypatch):
 

@@ -41,7 +41,7 @@ def register_model(run_id: str, model_name: str, client):
         return metrics, version
     
     except Exception as e:
-        logger.error('Unexpected error occured, %s')
+        logger.error('Unexpected error occured, %s', e)
         raise
 
 def is_eligible(metrics: json, threshold_metrics: json):
@@ -121,7 +121,7 @@ def main():
 
         if beats_production(metrics, prod_metrics):
 
-            if prod_metrics !=None:
+            if prod_metrics is not None:
                 # old_prod=client.get_latest_versions(model_name, stages=["Production"])
                 old_champ=client.get_model_version_by_alias(model_name, "champion")
                 old_champ_version=old_champ.version
@@ -138,7 +138,7 @@ def main():
             client.set_registered_model_alias(model_name, "shadow", version)
 
     except Exception as e:
-        logger.error('unexpected error occured, %s')
+        logger.error('unexpected error occured, %s', e)
         raise
 
 if __name__=="__main__":

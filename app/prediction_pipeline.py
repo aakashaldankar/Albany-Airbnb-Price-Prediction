@@ -1,4 +1,4 @@
-from app.model_loader import load_model, load_encoders
+from app.model_loader import load_encoders, load_best_model
 import os
 import pandas as pd
 import numpy as np
@@ -10,7 +10,7 @@ def get_encoders():
     return encoders
 
 def get_model():
-    model=load_model('albany price predictor','champion')
+    model=load_best_model('albany price predictor','champion')
     return model
 
 def pre_process(data: dict, encoders: dict=None):

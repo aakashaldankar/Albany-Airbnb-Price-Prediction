@@ -28,13 +28,16 @@ jobs:
             python3 -m pip install --upgrade pip
             pip install -r requirements.txt
 
+      - name: Run Ruff Lint
+        run: ruff check app src
+
       - name: Check DVC
         run: | 
           which dvc || echo 'dvc not found'
           dvc --version || true
 
-      - name: Run Unit Tests
-        run: pytest tests/unit
+      - name: Run Unit Tests with Coverage
+        run: pytest tests/unit --cov=app --cov=src --cov-report=term-missing --cov-fail-under=65
 
-      - name: Run Integration Tests
-        run: pytest tests/integration -m 'not slow'
+      - name: Run Integration Tests with Coverage
+        run: pytest tests/integration -m 'not slow' --cov=app --cov=src --cov-append --cov-report=term-missing --cov-fail-under=65

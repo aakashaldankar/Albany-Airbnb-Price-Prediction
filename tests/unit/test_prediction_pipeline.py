@@ -1,4 +1,4 @@
-from app.prediction_pipeline import prediction, pre_process
+from app.prediction_pipeline import prediction
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel

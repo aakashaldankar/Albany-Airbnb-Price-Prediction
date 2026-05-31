@@ -1,9 +1,7 @@
 from src.model.model_training import train_model, load_params, main
 from contextlib import contextmanager
-import os
-import mlflow.xgboost
-import yaml
 import pandas as pd
+import mlflow.xgboost
 
 def test_load_params():
 
