@@ -4,8 +4,8 @@ from app.schemas import PredictionRequest, PredictionResult
 app=FastAPI()
 
 def get_predictor():
-    from app.prediction_pipeline import predict
-    return predict
+    from app.prediction_pipeline import prediction
+    return prediction
 
 @app.get("/health")
 def health():

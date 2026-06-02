@@ -86,7 +86,7 @@ def main():
 
         params=load_params(params_path)
         model_hyper_parameters=params['model_training']['hyper_parameters']
-        tracking_uri=params['tracking_uri']
+        tracking_uri=os.getenv('MLFLOW_TRACKING_URI', params['tracking_uri'])
 
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment('Albany Experiment Tracking')
@@ -106,5 +106,4 @@ if __name__=="__main__":
     main()
     
         
-
 

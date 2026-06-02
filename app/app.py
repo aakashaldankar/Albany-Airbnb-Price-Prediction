@@ -678,4 +678,9 @@ with gr.Blocks(
 
 
 if __name__ == "__main__":
-    demo.launch(css=CSS, theme=gr.themes.Soft(primary_hue="teal", neutral_hue="slate"))
+    demo.launch(
+        server_name=os.getenv("GRADIO_SERVER_NAME", "127.0.0.1"),
+        server_port=int(os.getenv("GRADIO_SERVER_PORT", "7860")),
+        css=CSS,
+        theme=gr.themes.Soft(primary_hue="teal", neutral_hue="slate"),
+    )

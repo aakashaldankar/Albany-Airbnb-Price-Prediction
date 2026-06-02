@@ -4,13 +4,15 @@ import pandas as pd
 import numpy as np
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+MODEL_NAME = os.getenv("MODEL_NAME", "albany price predictor")
+MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
 
 def get_encoders():
     encoders=load_encoders()
     return encoders
 
 def get_model():
-    model=load_best_model('albany price predictor','champion')
+    model=load_best_model(MODEL_NAME, MODEL_ALIAS)
     return model
 
 def pre_process(data: dict, encoders: dict=None):

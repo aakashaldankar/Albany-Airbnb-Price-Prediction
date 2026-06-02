@@ -1,0 +1,10 @@
+fastapi==0.136.1
+uvicorn[standard]
+joblib==1.5.3
+mlflow==3.11.1
+numpy==2.4.4
+pandas
+pydantic==2.13.4
+scikit_learn==1.8.0
+xgboost==3.2.0
+category-encoders==2.9.0
