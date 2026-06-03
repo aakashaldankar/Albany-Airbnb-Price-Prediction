@@ -23,5 +23,4 @@ def predict_price(request: PredictionRequest, predictor=Depends(get_predictor)):
         prediction=predictor(request)
         return PredictionResult(result=prediction)
     except Exception:
-        raise HTTPException(status_code=500, 
-                            detail="Prediction Failed")
+        raise HTTPException(status_code=500, detail="Prediction Failed")
