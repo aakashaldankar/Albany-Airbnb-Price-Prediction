@@ -19,8 +19,6 @@ train_data_file_path=os.path.join(extracted_data_path, train_data_filename)
 test_data_file_path=os.path.join(extracted_data_path, test_data_filename)
     
 
-    
-
 def pre_preprocessing(df: pd.DataFrame):
 
     try:

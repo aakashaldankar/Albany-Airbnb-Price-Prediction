@@ -4,8 +4,8 @@ from app.schemas import PredictionRequest, PredictionResult
 app=FastAPI()
 
 def get_predictor():
-    from app.prediction_pipeline import predict
-    return predict
+    from app.prediction_pipeline import prediction
+    return prediction
 
 @app.get("/health")
 def health():
@@ -23,5 +23,4 @@ def predict_price(request: PredictionRequest, predictor=Depends(get_predictor)):
         prediction=predictor(request)
         return PredictionResult(result=prediction)
     except Exception:
-        raise HTTPException(status_code=500, 
-                            detail="Prediction Failed")
+        raise HTTPException(status_code=500, detail="Prediction Failed")

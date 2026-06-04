@@ -72,7 +72,7 @@ def test_main(monkeypatch, tmp_path):
     def mock_set_tracking_uri(uri):
 
         calls["mock_set_tracking"]=True
-        assert uri=="http://127.0.0.1:5001"
+        assert uri=="http://127.0.0.1:5000"
 
     def mock_set_experiment(name):
 

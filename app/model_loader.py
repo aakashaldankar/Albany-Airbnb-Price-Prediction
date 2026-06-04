@@ -10,14 +10,14 @@ root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 encoders_path = os.path.join(root_dir,'src','feature_encoders','feature_engineering_encoders.pkl')
 
 # mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiments','experiment_tracking')}")
-mlflow.set_tracking_uri("http://127.0.0.1:5000")
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"))
 
 def load_best_model(model_name:str, alias:str):
 
     try:
 
         model = mlflow.pyfunc.load_model(f"models:/{model_name}@{alias}")
-        logger.info(f"successfully loaded the model a {alias} {model_name} ")
+        logger.info(f"successfully loaded {alias} {model_name} model")
         return model
     
     except Exception as e:
@@ -37,7 +37,9 @@ def load_encoders():
         raise
 
 def main():
-    load_best_model('albany price predictor','Production')
+    model_name = os.getenv("MODEL_NAME", "albany price predictor")
+    model_alias = os.getenv("MODEL_ALIAS", "champion")
+    load_best_model(model_name, model_alias)
     load_encoders()
 
 if __name__=='__main__':
