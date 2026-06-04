@@ -10,7 +10,6 @@ import yaml
 script=os.path.basename(__file__)
 logger=get_logger(script)
 
-# root_dir=os.path.dirname(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 run_id_path=os.path.join(root_dir,'experiments')

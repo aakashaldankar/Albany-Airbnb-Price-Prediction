@@ -99,7 +99,6 @@ def feature_transform(df: pd.DataFrame):
         raise
 
 
-
 def label_encoding(train_df: pd.DataFrame, test_df: pd.DataFrame, column_name: str):
     """"
     Here we perform label encoding on the column name provided
@@ -117,7 +116,6 @@ def label_encoding(train_df: pd.DataFrame, test_df: pd.DataFrame, column_name: s
     except Exception as e:
         logger.error('unexpected error occured, %s', e)
         raise
-
 
 
 def target_encoding(train_df: pd.DataFrame, test_df: pd.DataFrame, column_name: str, target_column: str):
@@ -140,7 +138,6 @@ def target_encoding(train_df: pd.DataFrame, test_df: pd.DataFrame, column_name: 
 
         logger.error('unexpected error occured, %s', e)
         raise
-
 
 
 def one_hot_encoding(train_df: pd.DataFrame, test_df: pd.DataFrame, column_name: str):
@@ -215,7 +212,6 @@ def tfidf_nlp(train_df: pd.DataFrame, test_df: pd.DataFrame, column_name: str, m
 
         logger.error('unexpected error occured, %s', e)
         raise
-
 
 
 def main():
