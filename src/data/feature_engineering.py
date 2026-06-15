@@ -19,7 +19,7 @@ test_df='pre_processed_test.csv'
 root_dir=os.path.dirname(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 data_path=os.path.join(root_dir, 'central_data','pre_processed')
 
-encoder_path=os.path.join(root_dir, 'src', 'feature_encoders')
+encoder_path=os.path.join(root_dir, 'artifacts', 'feature_encoders')
 os.makedirs(encoder_path, exist_ok=True)
 
 save_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering')

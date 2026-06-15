@@ -17,6 +17,7 @@ os.makedirs(run_id_path,exist_ok=True)
 
 train_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_train_data.csv')
 test_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_test_data.csv')
+encoder_path=os.path.join(root_dir, 'artifacts', 'feature_encoders', 'feature_engineering_encoders.pkl')
 
 params_path=os.path.join(root_dir, 'params.yaml')
 
@@ -44,13 +45,15 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
             xgb = XGBRegressor(**params)
             xgb.fit(X_train, y_train)
             preds = xgb.predict(X_test)
-            print("REACHED LOG MODEL")
+            # print("REACHED LOG MODEL")
             mlflow.log_metric("mean_absolute_error", mean_absolute_error(y_test, preds))
             mlflow.log_metric("mean_squared_error", mean_squared_error(y_test, preds))
             mlflow.log_metric('root_mean_squared_error', root_mean_squared_error(y_test, preds))
             
             
             mlflow.xgboost.log_model(xgb_model=xgb, name="xgboost_model")  # XGBoost has its own flavor
+
+            mlflow.log_artifacts(encoder_path, "feature_engineering")
 
             with open(os.path.join(root_dir,'experiments','run_info.json'),'w') as f:
                 json.dump({'run_id': run_id}, f)
