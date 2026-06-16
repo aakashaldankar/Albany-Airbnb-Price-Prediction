@@ -113,7 +113,7 @@ def main():
         metrics, version=register_model(run_id, model_name, client)
 
         if not is_eligible(metrics, threshold_metrics):
-            print("model is not eligible so skipping")
+            print("This latest trained model is not eligible so skipping.")
             
             return 
         

@@ -2,6 +2,8 @@ import mlflow
 import os
 import joblib
 from src.logger import get_logger
+from mlflow.tracking import MlflowClient
+from mlflow.artifacts import download_artifacts
 
 script = os.path.basename(__file__)
 logger = get_logger(script)
@@ -24,11 +26,16 @@ def load_best_model(model_name:str, alias:str):
         logger.error("unexpected error occured, %s", e)
         raise 
 
-def load_encoders():
+def load_encoders(model_name: str, alias: str):
 
     try: 
 
-        encoders = joblib.load(encoders_path)
+        client = MlflowClient()
+
+        model_version=client.get_model_version_by_alias(model_name, alias)
+        encoders=download_artifacts(artifact_uri=(f"runs:/{model_version.run_id}/feature_engineering/feature_engineering_encoders.pkl"))
+
+        # encoders = joblib.load(encoders_path)
         logger.info("successfully loaded the data encoders")
         return encoders
     
