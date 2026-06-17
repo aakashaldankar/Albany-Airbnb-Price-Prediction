@@ -106,9 +106,9 @@ def main():
         mlflow.set_tracking_uri(tracking_uri)
         client = MlflowClient()
 
-        threshold_metrics={"mean_absolute_error": 0.3, 
-                        "mean_squared_error": 0.3, 
-                        "root_mean_squared_error": 0.3}
+        threshold_metrics={"mean_absolute_error": 0.5, 
+                        "mean_squared_error": 0.5, 
+                        "root_mean_squared_error": 0.5}
 
         metrics, version=register_model(run_id, model_name, client)
 

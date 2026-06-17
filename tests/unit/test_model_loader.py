@@ -1,5 +1,9 @@
 from app.model_loader import load_best_model, load_encoders, main
 import mlflow.pyfunc
+import os
+
+MODEL_NAME = os.getenv("MODEL_NAME", "albany price predictor")
+MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
 
 def test_load_model(monkeypatch):
 
@@ -26,7 +30,7 @@ def test_load_encoders(monkeypatch, tmp_path):
     
     monkeypatch.setattr("app.model_loader.joblib.load",mock_load)
 
-    result=load_encoders()
+    result=load_encoders(MODEL_NAME, MODEL_ALIAS)
 
     assert result=={"target_encoders": 1234}
 

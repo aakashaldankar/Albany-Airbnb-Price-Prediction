@@ -8,7 +8,7 @@ MODEL_NAME = os.getenv("MODEL_NAME", "albany price predictor")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
 
 def get_encoders():
-    encoders=load_encoders()
+    encoders=load_encoders(MODEL_NAME, MODEL_ALIAS)
     return encoders
 
 def get_model():

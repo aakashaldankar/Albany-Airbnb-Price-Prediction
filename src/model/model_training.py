@@ -15,6 +15,9 @@ root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 run_id_path=os.path.join(root_dir,'experiments')
 os.makedirs(run_id_path,exist_ok=True)
 
+# artifacts_path=os.path.join(root_dir, 'experiments', 'experiments_tracking')
+# os.makedirs(artifacts_path, exist_ok=True)
+
 train_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_train_data.csv')
 test_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_test_data.csv')
 encoder_path=os.path.join(root_dir, 'artifacts', 'feature_encoders', 'feature_engineering_encoders.pkl')
@@ -53,7 +56,7 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
             
             mlflow.xgboost.log_model(xgb_model=xgb, name="xgboost_model")  # XGBoost has its own flavor
 
-            mlflow.log_artifacts(encoder_path, "feature_engineering")
+            mlflow.log_artifact(encoder_path, artifact_path="feature_engineering")
 
             with open(os.path.join(root_dir,'experiments','run_info.json'),'w') as f:
                 json.dump({'run_id': run_id}, f)
