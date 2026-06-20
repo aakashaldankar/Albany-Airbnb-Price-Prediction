@@ -6,17 +6,12 @@ import mlflow
 from sklearn.metrics import mean_absolute_error, mean_squared_error, root_mean_squared_error
 import json
 import yaml
+from mlflow.tracking import MlflowClient
 
 script=os.path.basename(__file__)
 logger=get_logger(script)
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-
-run_id_path=os.path.join(root_dir,'experiments')
-os.makedirs(run_id_path,exist_ok=True)
-
-# artifacts_path=os.path.join(root_dir, 'experiments', 'experiments_tracking')
-# os.makedirs(artifacts_path, exist_ok=True)
 
 train_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_train_data.csv')
 test_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering','final_test_data.csv')
@@ -54,14 +49,19 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
             mlflow.log_metric('root_mean_squared_error', root_mean_squared_error(y_test, preds))
             
             
-            mlflow.xgboost.log_model(xgb_model=xgb, name="xgboost_model")  # XGBoost has its own flavor
+            model_info=mlflow.xgboost.log_model(xgb_model=xgb, name="xgboost_model")  # XGBoost has its own flavor
+
+            # register the logged model and assign the alias
+
+            model_name="albany price predictor"
+            model_version=mlflow.register_model(model_uri=model_info.model_uri, name=model_name)
+
+            client=MlflowClient()
+            client.set_registered_model_alias(name=model_name, alias='latest_trained', version=model_version.version)
 
             mlflow.log_artifact(encoder_path, artifact_path="feature_engineering")
 
-            with open(os.path.join(root_dir,'experiments','run_info.json'),'w') as f:
-                json.dump({'run_id': run_id}, f)
-
-            logger.info(f"run id of this experiment, {run_id} successfully stored to path, {os.path.join(root_dir,'experiments','run_info.json')}")
+            logger.info(f"Successfully trained and registered a new model with alias 'latest_trained'. ")
 
         logger.info('performed experiment tracking successfully')
 
