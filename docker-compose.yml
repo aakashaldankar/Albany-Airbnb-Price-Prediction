@@ -56,3 +56,21 @@ services:
       api:
         condition: service_healthy
     restart: unless-stopped
+
+  dvc-repro:
+    build:
+      context: .
+      dockerfile: Dockerfile.dvc
+    container_name: albany-dvc-repro
+    profiles:
+      - pipeline
+    working_dir: /app
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      HOME: /tmp
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - .:/app
+    depends_on:
+      mlflow:
+        condition: service_healthy

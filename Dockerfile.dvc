@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DEFAULT_TIMEOUT=300 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+ 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-dvc.txt .
+RUN pip install --no-cache-dir -r requirements-dvc.txt \
+    && pip install --no-cache-dir --no-deps xgboost==3.2.0
+
+COPY .dvc/config ./.dvc/config
+COPY .dvcignore dvc.yaml dvc.lock params.yaml ./
+COPY src ./src
+
+CMD ["dvc", "repro"]
