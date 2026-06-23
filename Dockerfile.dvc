@@ -17,7 +17,9 @@ RUN pip install --no-cache-dir -r requirements-dvc.txt \
     && pip install --no-cache-dir --no-deps xgboost==3.2.0
 
 COPY .dvc/config ./.dvc/config
-COPY .dvcignore dvc.yaml dvc.lock params.yaml ./
+COPY .dvcignore dvc.yaml params.yaml ./
 COPY src ./src
+
+RUN git init
 
 CMD ["dvc", "repro"]
