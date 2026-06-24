@@ -45,3 +45,4 @@ stages:
         cmd: python -m src.model.model_evaluation
         deps:
             - src/model/model_evaluation.py
+            - central_data/feature_engineering

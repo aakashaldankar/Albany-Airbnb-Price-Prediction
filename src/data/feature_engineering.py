@@ -251,7 +251,7 @@ def main():
         artifacts.update({'host_location_tfidf_encoder': host_location_tfidf_encoder})
 
         joblib.dump(artifacts, os.path.join(encoder_path, 'feature_engineering_encoders.pkl'))
-        logger.info(f'saved the artifacts of feature encoders to {os.path.join(encoder_path, 'feature_engineering_encoders.pkl')}')
+        logger.info(f"saved the artifacts of feature encoders to {os.path.join(encoder_path, 'feature_engineering_encoders.pkl')}")
 
         train_df.to_csv(os.path.join(save_data_path, 'final_train_data.csv'), index=False)
         test_df.to_csv(os.path.join(save_data_path, 'final_test_data.csv'), index=False)
