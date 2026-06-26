@@ -393,7 +393,7 @@ def predict_price(
     )
 
     request = urllib.request.Request(
-        API_URL,
+        f"{API_URL}/predict",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -413,13 +413,13 @@ def predict_price(
         return (
             render_price(None),
             "<span class='status-error'>Could not reach the FastAPI service</span>",
-            f"Endpoint: {API_URL}\nError: {exc.reason}",
+            f"Endpoint: {API_URL}/predict \nError: {exc.reason}",
         )
     except TimeoutError:
         return (
             render_price(None),
             "<span class='status-error'>Prediction request timed out</span>",
-            f"Endpoint: {API_URL}",
+            f"Endpoint: {API_URL}/predict",
         )
 
     prediction = float(body["result"])
@@ -433,7 +433,7 @@ def predict_price(
     }
     return (
         render_price(prediction),
-        f"<span class='status-ok'>Prediction received from {API_URL}</span>",
+        f"<span class='status-ok'>Prediction received from {API_URL}/predict</span>",
         json.dumps(submitted, indent=2),
     )
 
@@ -598,7 +598,7 @@ with gr.Blocks(
         with gr.Column(scale=4, min_width=360):
             gr.HTML("<div class='result-panel'>")
             price_output = gr.HTML(render_price(None))
-            status_output = gr.HTML(f"Waiting for prediction. FastAPI endpoint: {API_URL}")
+            status_output = gr.HTML(f"Waiting for prediction. FastAPI endpoint: {API_URL}/predict")
             summary_output = gr.Code(label="Submitted summary", language="json", value="{}")
             submit = gr.Button("Predict price", variant="primary", size="lg")
             gr.HTML("</div>")

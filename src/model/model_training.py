@@ -61,6 +61,9 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
 
             mlflow.log_artifact(encoder_path, artifact_path="feature_engineering")
 
+            print("Model URI:", model_info.model_uri)
+            print("Model ID :", model_info.model_id)
+
             logger.info(f"Successfully trained and registered a new model with alias 'latest_trained'. ")
 
         logger.info('performed experiment tracking successfully')
