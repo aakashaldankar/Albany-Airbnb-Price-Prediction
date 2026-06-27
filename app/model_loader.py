@@ -1,15 +1,15 @@
 import mlflow
-import os
 import joblib
+import os
 from src.logger import get_logger
+from mlflow.tracking import MlflowClient
+from mlflow.artifacts import download_artifacts
 
 script = os.path.basename(__file__)
 logger = get_logger(script)
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-encoders_path = os.path.join(root_dir,'src','feature_encoders','feature_engineering_encoders.pkl')
 
-# mlflow.set_tracking_uri(f"file://{os.path.join(root_dir,'experiments','experiment_tracking')}")
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"))
 
 def load_best_model(model_name:str, alias:str):
@@ -24,11 +24,16 @@ def load_best_model(model_name:str, alias:str):
         logger.error("unexpected error occured, %s", e)
         raise 
 
-def load_encoders():
+def load_encoders(model_name: str, alias: str):
 
     try: 
 
-        encoders = joblib.load(encoders_path)
+        client = MlflowClient()
+
+        model_version=client.get_model_version_by_alias(model_name, alias)
+        encoder_file=download_artifacts(artifact_uri=(f"runs:/{model_version.run_id}/feature_engineering/feature_engineering_encoders.pkl"))
+
+        encoders = joblib.load(encoder_file)
         logger.info("successfully loaded the data encoders")
         return encoders
     

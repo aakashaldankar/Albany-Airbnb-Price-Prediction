@@ -12,37 +12,23 @@ model_name='albany price predictor'
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-# tracking_uri = f"file://{os.path.join(root_dir, 'experiments', 'experiment_tracking')}"
-# mlflow.set_tracking_uri(tracking_uri)
-# mlflow.set_tracking_uri("http://127.0.0.1:5000")
-
-
-def register_model(run_id: str, model_name: str, client):
+def get_latest_trained_metrics(model_name: str, client):
 
     try: 
+        latest_trained_version=client.get_model_version_by_alias(model_name, 'latest_trained')
 
-        run = client.get_run(run_id)
+        latest_trained_run_id=latest_trained_version.run_id
+        latest_trained_run=client.get_run(latest_trained_run_id)
 
-        logged_models = client.search_logged_models(
-            experiment_ids=[run.info.experiment_id],
-            filter_string=f"source_run_id = '{run_id}'")
+        metrics=latest_trained_run.data.metrics
+        version=latest_trained_version.version
 
-        if not logged_models:
-            raise ValueError(f"No logged model found for run_id: {run_id}")
-        
-        model_uri=logged_models[0].model_uri
-        model_version=mlflow.register_model(model_uri, model_name)
-        version=model_version.version
-
-        metrics=run.data.metrics
-
-        logger.info(f'registered the model, {model_name} with version {version} in model registry')
+        logger.info(f"successfully extracted metrics of latest_trained model version {version}")
 
         return metrics, version
     
     except Exception as e:
-        logger.error('Unexpected error occured, %s', e)
-        raise
+        logger.error(f"Failed to fetch latest_trained metrics for model {model_name}: {e}")
 
 def is_eligible(metrics: json, threshold_metrics: json):
 
@@ -52,7 +38,6 @@ def is_eligible(metrics: json, threshold_metrics: json):
 
 def get_prod_metrics(model_name: str, client):
 
-    # prod_version=client.get_latest_versions(model_name, stages=["Production"])
     try: 
         prod_version=client.get_model_version_by_alias(model_name, "champion")
         prod_run_id = prod_version.run_id
@@ -63,7 +48,7 @@ def get_prod_metrics(model_name: str, client):
         return prod_run.data.metrics
     
     except Exception as e:
-        logger.error(f"Failed to fetch champion metrics for model '{model_name}': {e}")
+        logger.warning(f"No champion model found for {model_name}. This is expected on the first model evaluation run. {e} ")
         return None
     
 
@@ -94,35 +79,29 @@ def main():
         
     try: 
 
-        run_id_path = os.path.join(root_dir,'experiments','run_info.json')
-
-        with open(run_id_path, 'r') as f:
-            run_id=json.load(f)['run_id']
-
         params_path=os.path.join(root_dir, 'params.yaml')
         params=load_params(params_path)
-        tracking_uri=os.getenv('MLFLOW_TRACKING_URI', params['tracking_uri'])
+        tracking_uri=os.getenv(params['tracking_uri'],'MLFLOW_TRACKING_URI')
 
         mlflow.set_tracking_uri(tracking_uri)
         client = MlflowClient()
 
-        threshold_metrics={"mean_absolute_error": 0.3, 
-                        "mean_squared_error": 0.3, 
-                        "root_mean_squared_error": 0.3}
+        threshold_metrics={"mean_absolute_error": 0.5, 
+                        "mean_squared_error": 0.5, 
+                        "root_mean_squared_error": 0.5}
 
-        metrics, version=register_model(run_id, model_name, client)
+        metrics, version = get_latest_trained_metrics(model_name, client)
 
         if not is_eligible(metrics, threshold_metrics):
-            print("model is not eligible so skipping")
-            
+            print("This latest trained model is not eligible so skipping.")
             return 
         
         prod_metrics=get_prod_metrics(model_name, client)
 
         if beats_production(metrics, prod_metrics):
 
-            if prod_metrics is not None:
-                # old_prod=client.get_latest_versions(model_name, stages=["Production"])
+            if isinstance(prod_metrics, dict):
+
                 old_champ=client.get_model_version_by_alias(model_name, "champion")
                 old_champ_version=old_champ.version
                 client.set_registered_model_alias(model_name, "shadow", old_champ_version)

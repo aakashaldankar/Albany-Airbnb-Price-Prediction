@@ -1,0 +1,11 @@
+great_expectations==1.17.2
+joblib==1.5.3
+mlflow==3.11.1
+mlflow_skinny==3.11.1
+mlflow_tracing==3.11.1
+numpy==2.4.4
+pandas
+PyYAML==6.0.3
+scikit_learn==1.8.0
+category-encoders==2.9.0
+dvc==3.67.1

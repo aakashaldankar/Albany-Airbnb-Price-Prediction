@@ -9,8 +9,6 @@ WORKDIR /app
 COPY requirements-mlflow.txt .
 RUN pip install --no-cache-dir -r requirements-mlflow.txt
 
-RUN mkdir -p /mlflow/experiments/experiment_tracking
-
 EXPOSE 5000
 
-CMD ["mlflow", "server", "--backend-store-uri", "sqlite:////mlflow/experiments/mlflow.db", "--default-artifact-root", "/mlflow/experiments/experiment_tracking", "--host", "0.0.0.0", "--port", "5000", "--allowed-hosts", "localhost,127.0.0.1,mlflow:5000,albany-mlflow:5000"]
+CMD ["mlflow", "server", "--backend-store-uri", "sqlite:////mlflow/experiments/mlflow.db", "--artifacts-destination", "/mlflow/experiments/experiment_tracking", "--host", "0.0.0.0", "--port", "5000", "--serve-artifacts", "--allowed-hosts", "mlflow-service:5000"]

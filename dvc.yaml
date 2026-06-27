@@ -40,11 +40,9 @@ stages:
             - central_data/feature_engineering
         params: 
             - model_training.hyper_parameters
-        outs:
-            - experiments/run_info.json
 
     model_evaluation:
         cmd: python -m src.model.model_evaluation
         deps:
-            - experiments/run_info.json
             - src/model/model_evaluation.py
+            - central_data/feature_engineering

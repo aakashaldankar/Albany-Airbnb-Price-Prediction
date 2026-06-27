@@ -19,7 +19,7 @@ test_df='pre_processed_test.csv'
 root_dir=os.path.dirname(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 data_path=os.path.join(root_dir, 'central_data','pre_processed')
 
-encoder_path=os.path.join(root_dir, 'src', 'feature_encoders')
+encoder_path=os.path.join(root_dir, 'artifacts', 'feature_encoders')
 os.makedirs(encoder_path, exist_ok=True)
 
 save_data_path=os.path.join(root_dir, 'central_data', 'feature_engineering')
@@ -251,7 +251,7 @@ def main():
         artifacts.update({'host_location_tfidf_encoder': host_location_tfidf_encoder})
 
         joblib.dump(artifacts, os.path.join(encoder_path, 'feature_engineering_encoders.pkl'))
-        logger.info(f'saved the artifacts of feature encoders to {os.path.join(encoder_path, 'feature_engineering_encoders.pkl')}')
+        logger.info(f"saved the artifacts of feature encoders to {os.path.join(encoder_path, 'feature_engineering_encoders.pkl')}")
 
         train_df.to_csv(os.path.join(save_data_path, 'final_train_data.csv'), index=False)
         test_df.to_csv(os.path.join(save_data_path, 'final_test_data.csv'), index=False)
