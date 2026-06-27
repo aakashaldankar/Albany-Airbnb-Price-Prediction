@@ -5,7 +5,7 @@ import os
 MODEL_NAME = os.getenv("MODEL_NAME", "albany price predictor")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
 
-def test_load_model(monkeypatch):
+def test_load_best_model(monkeypatch):
 
     class LoadModel:
         model=10
@@ -23,12 +23,25 @@ def test_load_model(monkeypatch):
 
 def test_load_encoders(monkeypatch, tmp_path):
 
-    encoders={"target_encoders": 1234}
+    class ModelVersion:
 
-    def mock_load(encoders_path):
-        return encoders
+        def __init__(self):
+            self.run_id=1
+
+    class MlFlowClient:
+
+        def get_model_version_by_alias(self, model_name, alias):
+            return ModelVersion()
+    
+    def mock_download_artifacts(artifact_uri="artifacts"):
+        return {"target_encoders": 1234}
+
+    def mock_load(encoder_file):
+        return encoder_file
     
     monkeypatch.setattr("app.model_loader.joblib.load",mock_load)
+    monkeypatch.setattr("app.model_loader.MlflowClient", MlFlowClient)
+    monkeypatch.setattr("app.model_loader.download_artifacts", mock_download_artifacts)
 
     result=load_encoders(MODEL_NAME, MODEL_ALIAS)
 

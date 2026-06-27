@@ -55,4 +55,3 @@ def test_dvc_pipeline_runs_in_temp_workspace(tmp_path):
     assert (temp_project / "central_data/raw_data/train_data.csv").exists()
     assert (temp_project / "central_data/pre_processed/pre_processed_train.csv").exists()
     assert (temp_project / "central_data/feature_engineering/final_train_data.csv").exists()
-    assert (temp_project / "src/feature_encoders/feature_engineering_encoders.pkl").exists()

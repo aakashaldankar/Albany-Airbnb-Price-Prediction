@@ -48,7 +48,7 @@ def get_prod_metrics(model_name: str, client):
         return prod_run.data.metrics
     
     except Exception as e:
-        logger.warning(f"No champion model found for {model_name}. This is expected on the first model evaluation run. ")
+        logger.warning(f"No champion model found for {model_name}. This is expected on the first model evaluation run. {e} ")
         return None
     
 
@@ -81,7 +81,7 @@ def main():
 
         params_path=os.path.join(root_dir, 'params.yaml')
         params=load_params(params_path)
-        tracking_uri=os.getenv('MLFLOW_TRACKING_URI', params['tracking_uri'])
+        tracking_uri=os.getenv(params['tracking_uri'],'MLFLOW_TRACKING_URI')
 
         mlflow.set_tracking_uri(tracking_uri)
         client = MlflowClient()

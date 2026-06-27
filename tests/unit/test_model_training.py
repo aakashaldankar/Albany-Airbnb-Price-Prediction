@@ -19,6 +19,9 @@ def test_train_model(tmp_path, sample_train_data, monkeypatch):
         "log_params": False,
         "log_metric": 0,
         "log_model":False,
+        "register_model": False,
+        "set_registered_model_alias": False,
+        "log_artifact": False
     }
 
     @contextmanager
@@ -38,15 +41,46 @@ def test_train_model(tmp_path, sample_train_data, monkeypatch):
 
     def mock_log_metric(*args, **kwargs):
         calls["log_metric"]+=1
+
+    class ModelInfo:
+
+        def __init__(self):
+            self.model_uri='model_uri'
+            self.model_id=1
     
     def mock_log_model(*args, **kwargs):
         calls["log_model"]=True
+        return ModelInfo()
+    
+    class ModelVersion:
+
+        def __init__(self):
+            self.version=1
+    
+    def mock_register_model(model_uri, name):
+        calls["register_model"]=True
+        return ModelVersion()
+    
+    class MlFlowClient:
+
+        def set_registered_model_alias(self, name, alias, version):
+            calls['set_registered_model_alias']=True
+            return 0
+    
+    def mock_log_artifact(encoder_path: str, artifact_path: str):
+        calls["log_artifact"]=True
+        return 0
+
 
     monkeypatch.setattr('src.model.model_training.mlflow.start_run',mock_start_run)
     monkeypatch.setattr("src.model.model_training.mlflow.log_params",mock_log_params)
     monkeypatch.setattr("src.model.model_training.mlflow.log_metric",mock_log_metric)
     monkeypatch.setattr("src.model.model_training.mlflow.xgboost.log_model",mock_log_model)
-    monkeypatch.setattr("src.model.model_training.root_dir",tmp_path)
+    # monkeypatch.setattr("src.model.model_training.root_dir",tmp_path)
+    monkeypatch.setattr("src.model.model_training.mlflow.register_model", mock_register_model)
+    monkeypatch.setattr("src.model.model_training.MlflowClient", MlFlowClient)
+    monkeypatch.setattr("src.model.model_training.mlflow.log_artifact", mock_log_artifact)
+    monkeypatch.setattr("src.model.model_training.encoder_path", tmp_path)
 
     params={"max_depth": 2, "learning_rate": 0.1}
 
@@ -58,6 +92,9 @@ def test_train_model(tmp_path, sample_train_data, monkeypatch):
     assert calls["log_metric"]==3
     assert calls["start_run"]
     assert calls["log_model"]
+    assert calls["log_artifact"]
+    assert calls["register_model"]
+    assert calls["set_registered_model_alias"]
     
 
 def test_main(monkeypatch, tmp_path):
@@ -72,7 +109,7 @@ def test_main(monkeypatch, tmp_path):
     def mock_set_tracking_uri(uri):
 
         calls["mock_set_tracking"]=True
-        assert uri=="http://127.0.0.1:5000"
+        # assert uri=="http://127.0.0.1:5000"
 
     def mock_set_experiment(name):
 

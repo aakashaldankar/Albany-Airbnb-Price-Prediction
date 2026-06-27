@@ -4,7 +4,6 @@ import os
 from src.logger import get_logger
 import mlflow
 from sklearn.metrics import mean_absolute_error, mean_squared_error, root_mean_squared_error
-import json
 import yaml
 from mlflow.tracking import MlflowClient
 
@@ -37,6 +36,7 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
             logger.info('starting experiment tracking')
 
             run_id = run.info.run_id
+            print(f"Run ID: {run_id}")
         
             mlflow.log_params(params)
             
@@ -64,7 +64,7 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
             print("Model URI:", model_info.model_uri)
             print("Model ID :", model_info.model_id)
 
-            logger.info(f"Successfully trained and registered a new model with alias 'latest_trained'. ")
+            logger.info("Successfully trained and registered a new model with alias 'latest_trained'. ")
 
         logger.info('performed experiment tracking successfully')
 
@@ -94,7 +94,9 @@ def main():
 
         params=load_params(params_path)
         model_hyper_parameters=params['model_training']['hyper_parameters']
-        tracking_uri=os.getenv('MLFLOW_TRACKING_URI', params['tracking_uri'])
+        tracking_uri=os.getenv(params['tracking_uri'],'MLFLOW_TRACKING_URI')
+
+        print(f"MLFLOW_TRACKING_URI: {tracking_uri}")
 
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment('Albany Experiment Tracking')
