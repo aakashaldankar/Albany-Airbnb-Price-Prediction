@@ -81,7 +81,7 @@ def main():
 
         params_path=os.path.join(root_dir, 'params.yaml')
         params=load_params(params_path)
-        tracking_uri=os.getenv(params['tracking_uri'],'MLFLOW_TRACKING_URI')
+        tracking_uri=os.getenv('MLFLOW_TRACKING_URI',params['tracking_uri'])
 
         mlflow.set_tracking_uri(tracking_uri)
         client = MlflowClient()

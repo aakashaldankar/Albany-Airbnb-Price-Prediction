@@ -94,7 +94,7 @@ def main():
 
         params=load_params(params_path)
         model_hyper_parameters=params['model_training']['hyper_parameters']
-        tracking_uri=os.getenv(params['tracking_uri'],'MLFLOW_TRACKING_URI')
+        tracking_uri=os.getenv('MLFLOW_TRACKING_URI',params['tracking_uri'])
 
         print(f"MLFLOW_TRACKING_URI: {tracking_uri}")
 

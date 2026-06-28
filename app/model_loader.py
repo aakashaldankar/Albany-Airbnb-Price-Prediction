@@ -45,7 +45,7 @@ def main():
     model_name = os.getenv("MODEL_NAME", "albany price predictor")
     model_alias = os.getenv("MODEL_ALIAS", "champion")
     load_best_model(model_name, model_alias)
-    load_encoders()
+    load_encoders(model_name, model_alias)
 
 if __name__=='__main__':
     main()
