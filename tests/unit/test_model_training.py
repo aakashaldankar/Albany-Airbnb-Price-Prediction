@@ -83,10 +83,11 @@ def test_train_model(tmp_path, sample_train_data, monkeypatch):
     monkeypatch.setattr("src.model.model_training.encoder_path", tmp_path)
 
     params={"max_depth": 2, "learning_rate": 0.1}
+    model_name='"albany-price-predictor"'
 
     (tmp_path / "experiments").mkdir()
 
-    train_model(train_data, test_data, params)
+    train_model(train_data, test_data, params, model_name)
 
     assert calls["log_params"]
     assert calls["log_metric"]==3
@@ -114,9 +115,9 @@ def test_main(monkeypatch, tmp_path):
     def mock_set_experiment(name):
 
         calls["set_experiment"]=True
-        assert name=='Albany Experiment Tracking'
+        assert name=='Albany-Experiment-Tracking'
 
-    def mock_train_model(train_df, test_df, params):
+    def mock_train_model(train_df, test_df, params, model_name):
 
         calls["train_model"]=True
         assert train_df.shape[0]==3

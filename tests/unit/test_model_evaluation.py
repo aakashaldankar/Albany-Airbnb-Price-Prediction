@@ -127,14 +127,6 @@ def test_main(monkeypatch, tmp_path):
         "set_registered_model_alias": 0
     }
 
-    # def mock_register_model(run_id, model_name, client):
-
-    #     calls["register_model"]=True
-    #     metrics={'mean_absolute_error': 1, 'mean_squared_error': 1,'root_mean_squared_error': 1}
-    #     version=1
-
-    #     return metrics, version
-
     def mock_get_latest_trained_metrics(model_name: str, client):
 
         calls['get_latest_trained_metrics']=True
@@ -180,7 +172,7 @@ def test_main(monkeypatch, tmp_path):
     params_file=tmp_path/'params.yaml'
 
     with open(params_file, 'w') as f:
-        json.dump({'tracking_uri': "model_uri"}, f)
+        json.dump({'tracking_uri': "model_uri", 'model_name': "albany-price-predictor"}, f)
 
     monkeypatch.setattr("src.model.model_evaluation.get_latest_trained_metrics",mock_get_latest_trained_metrics)
     monkeypatch.setattr("src.model.model_evaluation.is_eligible",mock_is_eligible)
