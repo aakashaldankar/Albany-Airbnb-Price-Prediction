@@ -1,6 +1,7 @@
-from app.model_loader import load_best_model, load_encoders, main
+from app.model_loader import load_best_model, load_encoders, main, load_params
 import mlflow.pyfunc
 import os
+import yaml
 
 MODEL_NAME = os.getenv("MODEL_NAME", "albany price predictor")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
@@ -47,12 +48,26 @@ def test_load_encoders(monkeypatch, tmp_path):
 
     assert result=={"target_encoders": 1234}
 
+def test_load_params(tmp_path):
+
+    params={"1": 1}
+
+    params_path=tmp_path/'params.yaml'
+
+    with open(params_path,'w') as f:
+        yaml.dump(params, f)
+
+    result=load_params(params_path)
+
+    assert result==params
+
 
 def test_main(monkeypatch):
 
     calls={
         "load_model": False,
-        "loader_encoders": False
+        "loader_encoders": False,
+        "load_params": False
     }
 
     def mock_load_model(model_name, alias):
@@ -60,11 +75,17 @@ def test_main(monkeypatch):
 
     def mock_load_encoders(model_name, alias):
         calls["loader_encoders"]=True
+    
+    def mock_load_params(params_path: str):
+        calls['load_params']=True
+        return {"model_name": "zer0"}
 
     monkeypatch.setattr("app.model_loader.load_best_model", mock_load_model)
     monkeypatch.setattr("app.model_loader.load_encoders", mock_load_encoders)
+    monkeypatch.setattr('app.model_loader.load_params', mock_load_params)
 
     main()
 
     assert calls["loader_encoders"]
     assert calls["load_model"]
+    assert calls['load_params']

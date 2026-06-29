@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-MODEL_NAME = os.getenv("MODEL_NAME", "albany price predictor")
+MODEL_NAME = os.getenv("MODEL_NAME", "albany-price-predictor")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
 
 def get_encoders():

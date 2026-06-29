@@ -8,8 +8,6 @@ import yaml
 script=os.path.basename(__file__)
 logger=get_logger(script)
 
-model_name='albany price predictor'
-
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 def get_latest_trained_metrics(model_name: str, client):
@@ -81,6 +79,7 @@ def main():
 
         params_path=os.path.join(root_dir, 'params.yaml')
         params=load_params(params_path)
+        model_name=params['model_name']
         tracking_uri=os.getenv('MLFLOW_TRACKING_URI',params['tracking_uri'])
 
         mlflow.set_tracking_uri(tracking_uri)

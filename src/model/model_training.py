@@ -19,7 +19,7 @@ encoder_path=os.path.join(root_dir, 'artifacts', 'feature_encoders', 'feature_en
 params_path=os.path.join(root_dir, 'params.yaml')
 
 
-def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
+def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict, model_name: str):
 
     try:
 
@@ -53,7 +53,7 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, params: dict):
 
             # register the logged model and assign the alias
 
-            model_name="albany price predictor"
+            model_name=model_name
             model_version=mlflow.register_model(model_uri=model_info.model_uri, name=model_name)
 
             client=MlflowClient()
@@ -93,18 +93,20 @@ def main():
     try:
 
         params=load_params(params_path)
+        model_name=params['model_name']
+        experiment_name=params['experiment_name']
         model_hyper_parameters=params['model_training']['hyper_parameters']
         tracking_uri=os.getenv('MLFLOW_TRACKING_URI',params['tracking_uri'])
 
         print(f"MLFLOW_TRACKING_URI: {tracking_uri}")
 
         mlflow.set_tracking_uri(tracking_uri)
-        mlflow.set_experiment('Albany Experiment Tracking')
+        mlflow.set_experiment(experiment_name)
 
         train_df=pd.read_csv(train_data_path)
         test_df=pd.read_csv(test_data_path)
 
-        train_model(train_df=train_df, test_df=test_df, params=model_hyper_parameters)
+        train_model(train_df=train_df, test_df=test_df, params=model_hyper_parameters, model_name=model_name)
 
         logger.info('model training module performed successfully')
     
