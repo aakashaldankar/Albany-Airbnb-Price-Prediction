@@ -58,7 +58,7 @@ def test_main(monkeypatch):
     def mock_load_model(model_name, alias):
         calls["load_model"]=True
 
-    def mock_load_encoders():
+    def mock_load_encoders(model_name, alias):
         calls["loader_encoders"]=True
 
     monkeypatch.setattr("app.model_loader.load_best_model", mock_load_model)
