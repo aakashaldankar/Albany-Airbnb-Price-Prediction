@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r requirements-mlflow.txt
 
 EXPOSE 5000
 
-CMD ["mlflow", "server", "--backend-store-uri", ${BACKEND_STORE_URI}, "--artifacts-destination", ${ARTIFACTS_DESTINATION}, "--host", "0.0.0.0", "--port", "5000", "--serve-artifacts", "--allowed-hosts", "mlflow-service:5000"]
+CMD ["sh", "-c","mlflow server --backend-store-uri ${BACKEND_STORE_URI} --artifacts-destination ${ARTIFACTS_DESTINATION} --host 0.0.0.0 --port 5000 --serve-artifacts --allowed-hosts mlflow-service:5000, localhost:5000, 127.0.0.1:5000"]
