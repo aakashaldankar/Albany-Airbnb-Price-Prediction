@@ -18,3 +18,4 @@ knowledge.txt
 knowledge.md
 .coverage
 artifacts
+.env
