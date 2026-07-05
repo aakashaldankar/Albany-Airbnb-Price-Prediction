@@ -1,76 +1,136 @@
 services:
-  mlflow:
-    build:
+
+  postgres-service:
+    image: postgres:16-alpine
+    container_name: postgres-service
+    environment: 
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports: 
+      - "5432:5432"
+    volumes: 
+      - albany-postgres-data:/var/lib/postgresql/data
+    networks: [addnet]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  minio-service:
+    image: minio/minio
+    container_name: minio-service
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - albany-minio-data:/data
+    networks: [addnet]
+    restart: unless-stopped
+    healthcheck: 
+      test: ["CMD","curl","-f","http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  mlflow-service:
+    build: 
       context: .
       dockerfile: Dockerfile.mlflow
-    container_name: albany-mlflow
+    image: mlflow-image
+    container_name: mlflow-service
+    environment: 
+      BACKEND_STORE_URI: ${BACKEND_STORE_URI}
+      ARTIFACTS_DESTINATION: ${ARTIFACTS_DESTINATION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
     ports:
       - "5000:5000"
-    volumes:
-      - ./experiments:/mlflow/experiments
-      - ./experiments:/home/aaic/Personal_Projects/Albany-Airbnb-Price-Prediction/experiments:ro
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5)"]
-      interval: 30s
-      timeout: 10s
+    depends_on: 
+      postgres-service:
+        condition: service_healthy
+      minio-service:
+        condition: service_healthy
+    networks: [addnet]
+    restart: unless-stopped
+    healthcheck: 
+      test: ["CMD","python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5000/health', timeout=3).status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
       retries: 5
       start_period: 30s
-    restart: unless-stopped
 
-  api:
-    build:
+  fastapi-service:
+    build: 
       context: .
       dockerfile: Dockerfile.api
-    container_name: albany-api
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./experiments:/home/aaic/Personal_Projects/Albany-Airbnb-Price-Prediction/experiments
-    environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-      MODEL_NAME: albany price predictor
-      MODEL_ALIAS: champion
-    depends_on:
-      mlflow:
+    image: fastapi-image
+    container_name: fastapi-service
+    environment: 
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+    depends_on: 
+      mlflow-service:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
-      interval: 30s
-      timeout: 10s
+    networks: [addnet]
+    restart: unless-stopped
+    healthcheck: 
+      test: ["CMD", "python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health', timeout=3).status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
       retries: 5
       start_period: 20s
-    restart: unless-stopped
-
-  gradio:
-    build:
+    
+  gradio-service: 
+    build: 
       context: .
       dockerfile: Dockerfile.gradio
-    container_name: albany-gradio
-    ports:
+    image: gradio-image
+    container_name: gradio-service
+    environment: 
+      API_URL: ${API_URL}
+      GRADIO_SERVER_NAME: ${GRADIO_SERVER_NAME}
+    ports: 
       - "7860:7860"
-    environment:
-      API_URL: http://api:8000/predict
-      GRADIO_SERVER_NAME: 0.0.0.0
-      GRADIO_SERVER_PORT: 7860
-    depends_on:
-      api:
+    depends_on: 
+      fastapi-service:
         condition: service_healthy
+    networks: [addnet]
     restart: unless-stopped
+    healthcheck: 
+      test: ["CMD", "python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:7860/', timeout=3).status==200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-  dvc-repro:
-    build:
+  dvc-service: 
+    build: 
       context: .
-      dockerfile: Dockerfile.dvc
-    container_name: albany-dvc-repro
-    profiles:
-      - pipeline
-    working_dir: /app
-    user: "${UID:-1000}:${GID:-1000}"
-    environment:
-      HOME: /tmp
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-    volumes:
-      - .:/app
+      dockerfile: Dockerfile.train
+    image: dvc-image
+    container_name: dvc-pipeline
+    environment: 
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
     depends_on:
-      mlflow:
+      mlflow-service:
         condition: service_healthy
+    networks: [addnet]
+    profiles: ["train"]
+    restart: "no"
+    
+networks: 
+  addnet:
+    driver: bridge
+
+volumes: 
+  albany-postgres-data:
+  albany-minio-data:
