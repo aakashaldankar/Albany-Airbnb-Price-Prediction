@@ -41,6 +41,24 @@ services:
       retries: 5
       start_period: 15s
 
+  minio-init:
+    image: minio/mc
+    container_name: minio-init
+    depends_on:
+      minio-service:
+        condition: service_healthy
+    networks: [addnet]
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local ${MLFLOW_S3_ENDPOINT_URL} $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} 
+      && mc mb --ignore-existing local/mlflow-artifacts &&
+      echo 'Bucket mlflow-artifacts is ready'
+        "
+    environment: 
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    restart: "no"
+
   mlflow-service:
     build: 
       context: .
@@ -60,6 +78,8 @@ services:
         condition: service_healthy
       minio-service:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully # wait for the bucket job to succeed
     networks: [addnet]
     restart: unless-stopped
     healthcheck: 
