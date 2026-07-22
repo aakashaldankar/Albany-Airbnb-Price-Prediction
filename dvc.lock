@@ -9,11 +9,11 @@ stages:
       size: 2714
     params:
       params.yaml:
-        data_ingestion.test_size: 0.35
+        data_ingestion.test_size: 0.3
     outs:
     - path: central_data/raw_data
       hash: md5
-      md5: bfb3d953e1778eb308c8fee279e8b7b1.dir
+      md5: 4bd71adb82910c656e9b68cd5cde4ef3.dir
       size: 8205719
       nfiles: 2
   data_validation:
@@ -21,7 +21,7 @@ stages:
     deps:
     - path: central_data/raw_data
       hash: md5
-      md5: bfb3d953e1778eb308c8fee279e8b7b1.dir
+      md5: 4bd71adb82910c656e9b68cd5cde4ef3.dir
       size: 8205719
       nfiles: 2
     - path: src/data/data_validation.py
@@ -33,7 +33,7 @@ stages:
     deps:
     - path: central_data/raw_data
       hash: md5
-      md5: bfb3d953e1778eb308c8fee279e8b7b1.dir
+      md5: 4bd71adb82910c656e9b68cd5cde4ef3.dir
       size: 8205719
       nfiles: 2
     - path: src/data/data_preprocessing.py
@@ -43,16 +43,16 @@ stages:
     outs:
     - path: central_data/pre_processed
       hash: md5
-      md5: 116214da117a053c198c99488d50ba1d.dir
-      size: 5412140
+      md5: 67424fda48eeb5766bc8dc2d553b5667.dir
+      size: 5412139
       nfiles: 2
   feature_engineering:
     cmd: python3 -m src.data.feature_engineering
     deps:
     - path: central_data/pre_processed
       hash: md5
-      md5: 116214da117a053c198c99488d50ba1d.dir
-      size: 5412140
+      md5: 67424fda48eeb5766bc8dc2d553b5667.dir
+      size: 5412139
       nfiles: 2
     - path: src/data/feature_engineering.py
       hash: md5
@@ -64,16 +64,16 @@ stages:
     outs:
     - path: central_data/feature_engineering
       hash: md5
-      md5: 0ea1bf2c4869a36c043069c4db3fa2c4.dir
-      size: 2366110
+      md5: 31227cddf17e77ca3af26920211562dd.dir
+      size: 2363877
       nfiles: 2
   model_training:
     cmd: python3 -m src.model.model_training
     deps:
     - path: central_data/feature_engineering
       hash: md5
-      md5: 0ea1bf2c4869a36c043069c4db3fa2c4.dir
-      size: 2366110
+      md5: 31227cddf17e77ca3af26920211562dd.dir
+      size: 2363877
       nfiles: 2
     - path: src/model/model_training.py
       hash: md5
@@ -91,8 +91,8 @@ stages:
     deps:
     - path: central_data/feature_engineering
       hash: md5
-      md5: 0ea1bf2c4869a36c043069c4db3fa2c4.dir
-      size: 2366110
+      md5: 31227cddf17e77ca3af26920211562dd.dir
+      size: 2363877
       nfiles: 2
     - path: src/model/model_evaluation.py
       hash: md5
