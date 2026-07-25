@@ -12,7 +12,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements-dvc.txt .
+COPY dockers/requirements-dvc.txt .
 RUN pip install --no-cache-dir -r requirements-dvc.txt \
     && pip install --no-cache-dir --no-deps xgboost==3.2.0
 

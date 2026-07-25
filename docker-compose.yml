@@ -62,7 +62,7 @@ services:
   mlflow-service:
     build: 
       context: .
-      dockerfile: Dockerfile.mlflow
+      dockerfile: dockers/Dockerfile.mlflow
     image: mlflow-image
     container_name: mlflow-service
     environment: 
@@ -92,7 +92,7 @@ services:
   fastapi-service:
     build: 
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: dockers/Dockerfile.api
     image: fastapi-image
     container_name: fastapi-service
     environment: 
@@ -112,7 +112,7 @@ services:
   gradio-service: 
     build: 
       context: .
-      dockerfile: Dockerfile.gradio
+      dockerfile: dockers/Dockerfile.gradio
     image: gradio-image
     container_name: gradio-service
     environment: 
@@ -135,7 +135,7 @@ services:
   dvc-service: 
     build: 
       context: .
-      dockerfile: Dockerfile.train
+      dockerfile: dockers/Dockerfile.train
     image: dvc-image
     container_name: dvc-pipeline
     environment: 
