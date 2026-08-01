@@ -1,5 +1,5 @@
 data_ingestion:
-    test_size: 0.19
+    test_size: 0.21
     data_url: 'https://raw.githubusercontent.com/aakashaldankar/Albany-Airbnb-Listings-Data/refs/heads/main/listings.csv'
 
 feature_engineering:
