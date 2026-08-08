@@ -1,5 +1,5 @@
 resource "aws_db_subnet_group" "mlflow" {
-  name        = "${local.name_prefix}-mlflow-db-subnets"
+  name       = "${local.name_prefix}-mlflow-db-subnets"
   subnet_ids = module.vpc.private_subnets # RDS lives in private subnets - never public 
 }
 

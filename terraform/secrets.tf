@@ -2,7 +2,7 @@ resource "random_password" "db" {
   length  = 24
   special = true
   # RDS Postgres disallows these characters in master password 
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  override_special = "!*-_"
 }
 
 resource "aws_secretsmanager_secret" "db_password" {
