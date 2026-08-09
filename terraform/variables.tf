@@ -33,3 +33,9 @@ variable "ecr_repos" {
   type    = list(string)
   default = ["mlflow", "fastapi", "gradio", "dvc"]
 }
+
+variable "my_ip_cidr" {
+  description = "Your public IP in CIDR form, e.g 49.36.x.x/32 - locks down MLflow UI"
+  type        = string
+}
+
