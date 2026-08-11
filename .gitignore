@@ -36,3 +36,7 @@ terraform/*_override.tf.json
 terraform/.terraformrc
 terraform/terraform.rc
 
+*.tfstate
+*.tfstate.*
+
+aug_9th.log
