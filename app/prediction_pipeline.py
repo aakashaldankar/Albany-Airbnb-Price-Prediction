@@ -81,6 +81,7 @@ def prediction(request, model=None, encoders=None):
 
     data=request.model_dump()
     data=pre_process(data, encoders)
+    
     data_df=pd.DataFrame([data])
 
     prediction=model.predict(data_df)
