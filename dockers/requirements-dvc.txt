@@ -9,3 +9,4 @@ PyYAML==6.0.3
 scikit_learn==1.8.0
 category-encoders==2.9.0
 dvc==3.67.1
+boto3
