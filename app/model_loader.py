@@ -51,10 +51,42 @@ def load_params(params_path: str):
 
         logger.info('loaded hyper parameters successfully')
         return params
-    
+
     except Exception as e:
         logger.error('unexpected error occurred, %s', e)
         raise
+
+MODEL_NAME = os.getenv("MODEL_NAME", "albany-price-predictor")
+MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
+
+_model = None
+_encoders = None
+_model_version = None
+
+def load_model():
+    """(Re)loads the champion model + encoders into the module-level cache."""
+
+    global _model, _encoders, _model_version
+
+    _model = load_best_model(MODEL_NAME, MODEL_ALIAS)
+    _encoders = load_encoders(MODEL_NAME, MODEL_ALIAS)
+    _model_version = MlflowClient().get_model_version_by_alias(MODEL_NAME, MODEL_ALIAS).version
+
+    logger.info(f"model cache (re)loaded: {MODEL_NAME}@{MODEL_ALIAS} v{_model_version}")
+    return _model, _encoders
+
+def get_model():
+    if _model is None:
+        load_model()
+    return _model
+
+def get_encoders():
+    if _encoders is None:
+        load_model()
+    return _encoders
+
+def get_model_version():
+    return _model_version
 
 def main():
     

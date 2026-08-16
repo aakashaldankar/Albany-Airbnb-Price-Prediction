@@ -1,4 +1,5 @@
 from app.fastapi_main import app, get_predictor
+import app.fastapi_main as fastapi_main
 from fastapi.testclient import TestClient
 
 client=TestClient(app)
@@ -114,3 +115,37 @@ def test_predict_price_invalid_payload():
     assert response.status_code==422
 
     app.dependency_overrides.clear()
+
+
+def test_reload_model(monkeypatch):
+
+    calls={"load_model": False}
+
+    def mock_load_model():
+        calls["load_model"]=True
+
+    monkeypatch.setattr(fastapi_main, "load_model", mock_load_model)
+    monkeypatch.setattr(fastapi_main, "get_model_version", lambda: "5")
+
+    response=client.post("/admin/reload")
+
+    assert response.status_code==200
+    assert calls["load_model"]
+    assert response.json()=={
+        "status": "reloaded",
+        "model_name": fastapi_main.MODEL_NAME,
+        "model_alias": fastapi_main.MODEL_ALIAS,
+        "version": "5",
+    }
+
+
+def test_reload_model_failure(monkeypatch):
+
+    def mock_load_model():
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(fastapi_main, "load_model", mock_load_model)
+
+    response=client.post("/admin/reload")
+
+    assert response.status_code==500

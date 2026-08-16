@@ -1,0 +1,152 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  CLUSTER: albany-dev-cluster
+  # Set to "true" in a PR to trigger one retrain run right after this merge
+  # deploys successfully. Flip back to "false" afterwards - it only gates the
+  # manual trigger below, the nightly EventBridge schedule always runs regardless.
+  TRAIN_NOW: "false"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push images
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          TAG: sha-${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          docker build -f dockers/Dockerfile.mlflow -t "$REGISTRY/albany-dev/mlflow:$TAG" .
+          docker push "$REGISTRY/albany-dev/mlflow:$TAG"
+
+          docker build -f dockers/Dockerfile.api -t "$REGISTRY/albany-dev/fastapi:$TAG" .
+          docker push "$REGISTRY/albany-dev/fastapi:$TAG"
+
+          docker build -f dockers/Dockerfile.gradio -t "$REGISTRY/albany-dev/gradio:$TAG" .
+          docker push "$REGISTRY/albany-dev/gradio:$TAG"
+
+          # dvc has no aws_ecs_service / no per-deploy task-def registration - the
+          # retrain task definition just references ":latest" and Fargate pulls it
+          # fresh at RunTask time, so keeping this tag current is all that's needed.
+          docker build -f dockers/Dockerfile.train -t "$REGISTRY/albany-dev/dvc:latest" .
+          docker push "$REGISTRY/albany-dev/dvc:latest"
+
+      - name: Deploy, verify, and roll back on failure
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          TAG: sha-${{ github.sha }}
+          ALB_DNS_NAME: ${{ vars.ALB_DNS_NAME }}
+        run: |
+          set -uo pipefail
+
+          SERVICES=(fastapi gradio mlflow)
+          declare -A PREV_ARN
+
+          rollback() {
+            echo "::warning::Rolling back to previous task definitions"
+            for svc in "${SERVICES[@]}"; do
+              if [ -n "${PREV_ARN[$svc]:-}" ]; then
+                aws ecs update-service --cluster "$CLUSTER" --service "albany-dev-$svc" \
+                  --task-definition "${PREV_ARN[$svc]}" >/dev/null
+              fi
+            done
+            aws ecs wait services-stable --cluster "$CLUSTER" \
+              --services "${SERVICES[@]/#/albany-dev-}"
+          }
+
+          for svc in "${SERVICES[@]}"; do
+            FAMILY="albany-dev-$svc"
+
+            PREV_ARN[$svc]=$(aws ecs describe-task-definition --task-definition "$FAMILY" \
+              --query 'taskDefinition.taskDefinitionArn' --output text) \
+              || { echo "::error::describe-task-definition failed for $svc"; rollback; exit 1; }
+
+            NEW_TASKDEF=$(aws ecs describe-task-definition --task-definition "$FAMILY" \
+              --query 'taskDefinition' | jq --arg IMAGE "$REGISTRY/albany-dev/$svc:$TAG" '
+                .containerDefinitions[0].image = $IMAGE
+                | del(.taskDefinitionArn, .revision, .status, .requiresAttributes,
+                      .compatibilities, .registeredAt, .registeredBy)
+              ') || { echo "::error::rendering new task def failed for $svc"; rollback; exit 1; }
+
+            NEW_ARN=$(echo "$NEW_TASKDEF" | aws ecs register-task-definition \
+              --cli-input-json file:///dev/stdin \
+              --query 'taskDefinition.taskDefinitionArn' --output text) \
+              || { echo "::error::register-task-definition failed for $svc"; rollback; exit 1; }
+
+            aws ecs update-service --cluster "$CLUSTER" --service "$FAMILY" \
+              --task-definition "$NEW_ARN" >/dev/null \
+              || { echo "::error::update-service failed for $svc"; rollback; exit 1; }
+          done
+
+          if ! aws ecs wait services-stable --cluster "$CLUSTER" \
+              --services "${SERVICES[@]/#/albany-dev-}"; then
+            echo "::error::Service(s) failed to stabilize"
+            rollback
+            exit 1
+          fi
+
+          SMOKE_OK=0
+          for i in 1 2 3 4 5; do
+            if curl -sf "http://${ALB_DNS_NAME}/" >/dev/null; then
+              SMOKE_OK=1
+              break
+            fi
+            sleep 10
+          done
+
+          if [ "$SMOKE_OK" -ne 1 ]; then
+            echo "::error::Smoke test failed"
+            rollback
+            exit 1
+          fi
+
+          echo "Deploy succeeded: ${SERVICES[*]} now running $TAG"
+
+  retrain:
+    needs: deploy
+    if: env.TRAIN_NOW == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Trigger DVC retrain task
+        env:
+          SUBNETS: ${{ vars.PRIVATE_SUBNET_IDS }}
+          SG: ${{ vars.ECS_TASKS_SECURITY_GROUP_ID }}
+        run: |
+          set -euo pipefail
+          aws ecs run-task \
+            --cluster "$CLUSTER" \
+            --task-definition albany-dev-dvc \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=DISABLED}" \
+            --started-by github-actions-train-now

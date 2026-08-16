@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir -r requirements-dvc.txt \
 COPY .dvc/config ./.dvc/config
 COPY .dvcignore dvc.yaml params.yaml ./
 COPY src ./src
+COPY dockers/ecs_resolve_endpoints.py .
 
 RUN git init
 
