@@ -1,0 +1,16 @@
+FROM grafana/grafana:11.2.0
+
+USER root
+RUN apk add --no-cache gettext-envsubst
+
+COPY dockers/grafana/provisioning/datasources/datasource.yml.template /etc/grafana/provisioning/datasources/datasource.yml.template
+COPY dockers/grafana/provisioning/dashboards/dashboards.yml /etc/grafana/provisioning/dashboards/dashboards.yml
+COPY dockers/grafana/dashboards/fastapi-monitoring.json /var/lib/grafana/dashboards/fastapi-monitoring.json
+COPY dockers/grafana/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh && \
+    chown -R grafana:root /var/lib/grafana/dashboards /etc/grafana/provisioning
+
+USER grafana
+EXPOSE 3000
+ENTRYPOINT ["/entrypoint.sh"]

@@ -61,3 +61,31 @@ resource "aws_lb_listener" "mlflow" {
     target_group_arn = aws_lb_target_group.mlflow.arn
   }
 }
+
+# ----- Grafana target group + listener on :3000 (your IP only, via ALB SG) -----
+
+resource "aws_lb_target_group" "grafana" {
+  name        = "${local.name_prefix}-grafana-tg"
+  port        = 3000
+  protocol    = "HTTP"
+  vpc_id      = module.vpc.vpc_id
+  target_type = "ip"
+  health_check {
+    path                = "/api/health"
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+    timeout             = 5
+    interval            = 30
+    matcher             = "200-399"
+  }
+}
+
+resource "aws_lb_listener" "grafana" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 3000
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.grafana.arn
+  }
+}

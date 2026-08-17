@@ -109,7 +109,52 @@ services:
       retries: 5
       start_period: 20s
     
-  gradio-service: 
+  prometheus-service:
+    build:
+      context: .
+      dockerfile: dockers/Dockerfile.prometheus
+    image: prometheus-image
+    container_name: prometheus-service
+    environment:
+      FASTAPI_HOST: fastapi-service
+    ports:
+      - "9090:9090"
+    depends_on:
+      fastapi-service:
+        condition: service_healthy
+    networks: [addnet]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  grafana-service:
+    build:
+      context: .
+      dockerfile: dockers/Dockerfile.grafana
+    image: grafana-image
+    container_name: grafana-service
+    environment:
+      PROMETHEUS_HOST: prometheus-service
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus-service:
+        condition: service_healthy
+    networks: [addnet]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  gradio-service:
     build: 
       context: .
       dockerfile: dockers/Dockerfile.gradio

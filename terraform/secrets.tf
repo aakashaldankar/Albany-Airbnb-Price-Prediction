@@ -25,3 +25,19 @@ resource "aws_secretsmanager_secret_version" "backend_store_uri" {
   secret_string = "postgresql://${var.db_username}:${random_password.db.result}@${aws_db_instance.mlflow.endpoint}/mlflow"
 }
 
+resource "random_password" "grafana_admin" {
+  length           = 24
+  special          = true
+  override_special = "!*-_"
+}
+
+resource "aws_secretsmanager_secret" "grafana_admin_password" {
+  name                    = "${local.name_prefix}/grafana/admin-password"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "grafana_admin_password" {
+  secret_id     = aws_secretsmanager_secret.grafana_admin_password.id
+  secret_string = random_password.grafana_admin.result
+}
+

@@ -8,3 +8,4 @@ pydantic==2.13.4
 scikit_learn==1.8.0
 xgboost==3.2.0
 category-encoders==2.9.0
+prometheus-fastapi-instrumentator==8.1.0

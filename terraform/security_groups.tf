@@ -20,6 +20,14 @@ resource "aws_security_group" "alb" {
     cidr_blocks = [var.my_ip_cidr] # least-privilege: only your IP sees MLflow
   }
 
+  ingress {
+    description = "Grafana UI - restricted to you"
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip_cidr]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -50,6 +58,16 @@ resource "aws_security_group" "ecs_tasks" {
     security_groups = [aws_security_group.alb.id]
   }
 
+  ingress {
+    description     = "Grafana from ALB"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  # No separate rule needed for Grafana -> Prometheus:9090 or Prometheus -> FastAPI:8000 —
+  # both already covered by the self-referencing all-ports rule below.
   ingress {
     description = "Service Connect: tasks talk to each other within this SG"
     from_port   = 0
