@@ -1,0 +1,17 @@
+FROM alpine:3.20 AS envsubst-builder
+RUN apk add --no-cache gettext-envsubst
+
+FROM prom/prometheus:v2.55.1
+
+COPY --from=envsubst-builder /usr/bin/envsubst /usr/bin/envsubst
+COPY --from=envsubst-builder /lib/ld-musl-x86_64.so.1 /lib/ld-musl-x86_64.so.1
+COPY --from=envsubst-builder /usr/lib/libintl.so.8 /usr/lib/libintl.so.8
+COPY --chown=nobody:nogroup dockers/prometheus/prometheus.yml.template /etc/prometheus/prometheus.yml.template
+COPY dockers/prometheus/entrypoint.sh /entrypoint.sh
+
+USER root
+RUN chmod +x /entrypoint.sh /usr/bin/envsubst
+USER nobody
+
+EXPOSE 9090
+ENTRYPOINT ["/entrypoint.sh"]

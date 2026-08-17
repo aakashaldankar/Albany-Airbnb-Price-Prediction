@@ -31,7 +31,7 @@ variable "db_username" {
 
 variable "ecr_repos" {
   type    = list(string)
-  default = ["mlflow", "fastapi", "gradio", "dvc"]
+  default = ["mlflow", "fastapi", "gradio", "dvc", "prometheus", "grafana"]
 }
 
 variable "my_ip_cidr" {

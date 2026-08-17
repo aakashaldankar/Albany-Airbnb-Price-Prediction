@@ -32,7 +32,8 @@ resource "aws_iam_role_policy" "ecs_execution_secrets" {
       Action = ["secretsmanager:GetSecretValue"]
       Resource = [
         aws_secretsmanager_secret.backend_store_uri.arn,
-        aws_secretsmanager_secret.db_password.arn
+        aws_secretsmanager_secret.db_password.arn,
+        aws_secretsmanager_secret.grafana_admin_password.arn
       ]
     }]
   })
