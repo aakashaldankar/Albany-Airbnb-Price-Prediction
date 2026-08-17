@@ -16,3 +16,4 @@ category-encoders==2.9.0
 dvc==3.67.1
 ruff==0.15.15
 pytest-cov==7.1.0
+prometheus-fastapi-instrumentator==8.1.0
